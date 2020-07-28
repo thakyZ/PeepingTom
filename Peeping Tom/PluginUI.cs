@@ -262,13 +262,7 @@ namespace PeepingTom {
             if (shouldBeShown) {
                 PlayerCharacter player = this.pi.ClientState.LocalPlayer;
                 if (player != null) {
-                    PlayerCharacter[] targeting = this.pi.ClientState.Actors
-                        .Where(actor => actor.TargetActorID == player.ActorId && actor is PlayerCharacter)
-                        .Select(actor => actor as PlayerCharacter)
-                        .Where(actor => this.config.LogParty || this.pi.ClientState.PartyList.All(member => member.Actor.ActorId != actor.ActorId))
-                        .Where(actor => this.config.LogAlliance || !this.InAlliance(actor))
-                        .Where(actor => this.config.LogInCombat || !this.InCombat(actor))
-                        .ToArray();
+                    PlayerCharacter[] targeting = this.GetTargeting(player);
                     if (this.config.PlaySoundOnTarget && targeting.Length > this.lastTargetAmount && this.CanPlaySound()) {
                         this.soundLastPlayed = Stopwatch.GetTimestamp();
                         this.PlaySound();
@@ -328,11 +322,9 @@ namespace PeepingTom {
             if (this.config.MarkTargeting) {
                 PlayerCharacter player = this.pi.ClientState.LocalPlayer;
                 if (player != null) {
-                    var actors = this.pi.ClientState.Actors
-                        .Where(actor => actor.TargetActorID == player.ActorId && actor is PlayerCharacter)
-                        .Select(actor => actor as PlayerCharacter);
-                    foreach (PlayerCharacter target in actors) {
-                        MarkPlayer(target, this.config.TargetingColour, this.config.TargetingSize);
+                    PlayerCharacter[] targeting = this.GetTargeting(player);
+                    foreach (PlayerCharacter targeter in targeting) {
+                        MarkPlayer(targeter, this.config.TargetingColour, this.config.TargetingSize);
                     }
                 }
             }
@@ -478,6 +470,16 @@ namespace PeepingTom {
 
         private bool InAlliance(Actor actor) {
             return (GetStatus(actor) & 32) > 0;
+        }
+
+        private PlayerCharacter[] GetTargeting(Actor player) {
+            return this.pi.ClientState.Actors
+                .Where(actor => actor.TargetActorID == player.ActorId && actor is PlayerCharacter)
+                .Select(actor => actor as PlayerCharacter)
+                .Where(actor => this.config.LogParty || this.pi.ClientState.PartyList.All(member => member.Actor.ActorId != actor.ActorId))
+                .Where(actor => this.config.LogAlliance || !this.InAlliance(actor))
+                .Where(actor => this.config.LogInCombat || !this.InCombat(actor))
+                .ToArray();
         }
     }
 }
