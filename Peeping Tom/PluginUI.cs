@@ -332,7 +332,7 @@ namespace PeepingTom {
 
         private void AddEntry(PlayerCharacter targeter, ImGuiSelectableFlags flags = ImGuiSelectableFlags.None) {
             ImGui.Selectable(targeter.Name, false, flags);
-            bool hover = ImGui.IsItemHovered();
+            bool hover = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled);
             bool left = hover && ImGui.IsMouseClicked(0);
             bool right = hover && ImGui.IsMouseClicked(1);
             bool present = this.pi.ClientState.Actors.Any(actor => actor.ActorId == targeter.ActorId);
