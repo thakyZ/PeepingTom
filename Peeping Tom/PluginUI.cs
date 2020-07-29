@@ -158,16 +158,19 @@ namespace PeepingTom {
                             bool showInCombat = this.config.ShowInCombat;
                             if (ImGui.Checkbox("Show window while in combat", ref showInCombat)) {
                                 this.config.ShowInCombat = showInCombat;
+                                this.config.Save();
                             }
 
                             bool showInInstance = this.config.ShowInInstance;
                             if (ImGui.Checkbox("Show window while in instance", ref showInInstance)) {
                                 this.config.ShowInInstance = showInInstance;
+                                this.config.Save();
                             }
 
                             bool showInCutscenes = this.config.ShowInCutscenes;
                             if (ImGui.Checkbox("Show window while in cutscenes", ref showInCutscenes)) {
                                 this.config.ShowInCutscenes = showInCutscenes;
+                                this.config.Save();
                             }
 
                             ImGui.EndTabItem();
