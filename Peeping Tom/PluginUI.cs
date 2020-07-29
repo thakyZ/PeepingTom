@@ -270,6 +270,7 @@ namespace PeepingTom {
                     this.lastTargetAmount = targeting.Length;
                     if (ImGui.Begin(this.plugin.Name, ref this.visible, ImGuiWindowFlags.AlwaysAutoResize)) {
                         ImGui.Text("Targeting you");
+                        bool anyHovered = false;
                         if (ImGui.ListBoxHeader("##targeting", targeting.Length, 5)) {
                             // add the two first players for testing
                             //foreach (PlayerCharacter p in this.pi.ClientState.Actors
@@ -287,7 +288,7 @@ namespace PeepingTom {
                                     }
                                     this.previousTargeters.Insert(0, new Targeter(targeter));
                                 }
-                                this.AddEntry(new Targeter(targeter), targeter.Address);
+                                this.AddEntry(new Targeter(targeter), targeter.Address, ref anyHovered);
                             }
                             if (this.config.KeepHistory) {
                                 // only keep the configured number of previous targeters (ignoring ones that are currently targeting)
@@ -301,12 +302,12 @@ namespace PeepingTom {
                                     .ToArray();
                                 // add previous targeters to the list
                                 foreach (Targeter oldTargeter in previous) {
-                                    this.AddEntry(oldTargeter, null, ImGuiSelectableFlags.Disabled);
+                                    this.AddEntry(oldTargeter, null, ref anyHovered, ImGuiSelectableFlags.Disabled);
                                 }
                             }
                             ImGui.ListBoxFooter();
                         }
-                        if (this.config.FocusTargetOnHover && !ImGui.IsAnyItemHovered() && this.previousFocus != null) {
+                        if (this.config.FocusTargetOnHover && !anyHovered && this.previousFocus != null) {
                             // old focus target still here
                             if (this.pi.ClientState.Actors.Any(actor => actor.Address == this.previousFocus)) {
                                 this.FocusTarget((IntPtr)this.previousFocus);
@@ -337,11 +338,10 @@ namespace PeepingTom {
             }
         }
 
-        
-
-        private void AddEntry(Targeter targeter, IntPtr? address, ImGuiSelectableFlags flags = ImGuiSelectableFlags.None) {
+        private void AddEntry(Targeter targeter, IntPtr? address, ref bool anyHovered, ImGuiSelectableFlags flags = ImGuiSelectableFlags.None) {
             ImGui.Selectable(targeter.Name, false, flags);
             bool hover = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled);
+            anyHovered |= hover;
             bool left = hover && ImGui.IsMouseClicked(0);
             bool right = hover && ImGui.IsMouseClicked(1);
             if (address == null) {
