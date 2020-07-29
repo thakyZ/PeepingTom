@@ -153,8 +153,15 @@ namespace PeepingTom {
                             ImGui.EndTabItem();
                         }
 
-                        if (ImGui.BeginTabItem("Visibility")) {
-                            // TODO: this needs somewhere better to live in the settings
+                        if (ImGui.BeginTabItem("Window")) {
+                            bool allowMovement = this.config.AllowMovement;
+                            if (ImGui.Checkbox("Allow moving the main window", ref allowMovement)) {
+                                this.config.AllowMovement = allowMovement;
+                                this.config.Save();
+                            }
+
+                            ImGui.Spacing();
+
                             bool showInCombat = this.config.ShowInCombat;
                             if (ImGui.Checkbox("Show window while in combat", ref showInCombat)) {
                                 this.config.ShowInCombat = showInCombat;
@@ -271,7 +278,11 @@ namespace PeepingTom {
                         this.PlaySound();
                     }
                     this.lastTargetAmount = targeting.Length;
-                    if (ImGui.Begin(this.plugin.Name, ref this.visible, ImGuiWindowFlags.AlwaysAutoResize)) {
+                    ImGuiWindowFlags flags = ImGuiWindowFlags.AlwaysAutoResize;
+                    if (!this.config.AllowMovement) {
+                        flags |= ImGuiWindowFlags.NoMove;
+                    }
+                    if (ImGui.Begin(this.plugin.Name, ref this.visible, flags)) {
                         ImGui.Text("Targeting you");
                         bool anyHovered = false;
                         if (ImGui.ListBoxHeader("##targeting", targeting.Length, 5)) {

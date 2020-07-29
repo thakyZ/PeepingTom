@@ -36,6 +36,7 @@ namespace PeepingTom {
         public string SoundPath { get; set; } = null;
         public float SoundCooldown { get; set; } = 10f;
 
+        public bool AllowMovement { get; set; } = true;
         public bool ShowInCombat { get; set; } = false;
         public bool ShowInInstance { get; set; } = false;
         public bool ShowInCutscenes { get; set; } = false;
