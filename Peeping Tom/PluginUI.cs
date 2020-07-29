@@ -286,16 +286,20 @@ namespace PeepingTom {
                                         this.previousTargeters.RemoveAll(old => old.ActorId == targeter.ActorId);
                                     }
                                     this.previousTargeters.Insert(0, new Targeter(targeter));
-                                    while (this.previousTargeters.Where(old => targeting.All(actor => actor.ActorId != old.ActorId)).Count() > this.config.NumHistory) {
-                                        this.previousTargeters.RemoveAt(this.previousTargeters.Count - 1);
-                                    }
                                 }
                                 this.AddEntry(new Targeter(targeter), targeter.Address);
                             }
-                            Targeter[] previous = this.previousTargeters
-                                .Where(old => targeting.All(actor => actor.ActorId != old.ActorId))
-                                .ToArray();
                             if (this.config.KeepHistory) {
+                                // only keep the configured number of previous targeters (ignoring ones that are currently targeting)
+                                while (this.previousTargeters.Where(old => targeting.All(actor => actor.ActorId != old.ActorId)).Count() > this.config.NumHistory) {
+                                    this.previousTargeters.RemoveAt(this.previousTargeters.Count - 1);
+                                }
+                                // get a list of the previous targeters that aren't currently targeting
+                                Targeter[] previous = this.previousTargeters
+                                    .Where(old => targeting.All(actor => actor.ActorId != old.ActorId))
+                                    .Take(this.config.NumHistory)
+                                    .ToArray();
+                                // add previous targeters to the list
                                 foreach (Targeter oldTargeter in previous) {
                                     this.AddEntry(oldTargeter, null, ImGuiSelectableFlags.Disabled);
                                 }
