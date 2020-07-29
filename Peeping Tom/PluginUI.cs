@@ -20,7 +20,7 @@ namespace PeepingTom {
         private readonly Configuration config;
         private readonly DalamudPluginInterface pi;
 
-        private readonly List<PlayerCharacter> previousTargeters = new List<PlayerCharacter>();
+        private readonly List<Targeter> previousTargeters = new List<Targeter>();
         private IntPtr? previousFocus = null;
         private long soundLastPlayed = 0;
         private int lastTargetAmount = 0;
@@ -285,16 +285,19 @@ namespace PeepingTom {
                                     if (this.previousTargeters.Any(old => old.ActorId == targeter.ActorId)) {
                                         this.previousTargeters.RemoveAll(old => old.ActorId == targeter.ActorId);
                                     }
-                                    this.previousTargeters.Insert(0, targeter);
-                                    while (this.previousTargeters.Where(old => !targeting.Contains(old)).Count() > this.config.NumHistory) {
+                                    this.previousTargeters.Insert(0, new Targeter(targeter));
+                                    while (this.previousTargeters.Where(old => targeting.All(actor => actor.ActorId != old.ActorId)).Count() > this.config.NumHistory) {
                                         this.previousTargeters.RemoveAt(this.previousTargeters.Count - 1);
                                     }
                                 }
-                                this.AddEntry(targeter);
+                                this.AddEntry(new Targeter(targeter), targeter.Address);
                             }
+                            Targeter[] previous = this.previousTargeters
+                                .Where(old => targeting.All(actor => actor.ActorId != old.ActorId))
+                                .ToArray();
                             if (this.config.KeepHistory) {
-                                foreach (PlayerCharacter oldTargeter in this.previousTargeters.Where(old => !targeting.Contains(old))) {
-                                    this.AddEntry(oldTargeter, ImGuiSelectableFlags.Disabled);
+                                foreach (Targeter oldTargeter in previous) {
+                                    this.AddEntry(oldTargeter, null, ImGuiSelectableFlags.Disabled);
                                 }
                             }
                             ImGui.ListBoxFooter();
@@ -302,9 +305,9 @@ namespace PeepingTom {
                         if (this.config.FocusTargetOnHover && !ImGui.IsAnyItemHovered() && this.previousFocus != null) {
                             // old focus target still here
                             if (this.pi.ClientState.Actors.Any(actor => actor.Address == this.previousFocus)) {
-                                this.FocusTargetRaw((IntPtr)this.previousFocus);
+                                this.FocusTarget((IntPtr)this.previousFocus);
                             } else {
-                                this.FocusTargetRaw(IntPtr.Zero);
+                                this.FocusTarget(IntPtr.Zero);
                             }
                             this.previousFocus = null;
                         }
@@ -330,18 +333,25 @@ namespace PeepingTom {
             }
         }
 
-        private void AddEntry(PlayerCharacter targeter, ImGuiSelectableFlags flags = ImGuiSelectableFlags.None) {
+        
+
+        private void AddEntry(Targeter targeter, IntPtr? address, ImGuiSelectableFlags flags = ImGuiSelectableFlags.None) {
             ImGui.Selectable(targeter.Name, false, flags);
             bool hover = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled);
             bool left = hover && ImGui.IsMouseClicked(0);
             bool right = hover && ImGui.IsMouseClicked(1);
-            bool present = this.pi.ClientState.Actors.Any(actor => actor.ActorId == targeter.ActorId);
+            if (address == null) {
+                address = this.pi.ClientState.Actors
+                    .Where(actor => actor.ActorId == targeter.ActorId)
+                    .FirstOrDefault()
+                    ?.Address;
+            }
 
-            if (this.config.FocusTargetOnHover && hover && present) {
+            if (this.config.FocusTargetOnHover && hover && address != null) {
                 if (this.previousFocus == null) {
                     this.previousFocus = this.GetRawFocusTarget();
                 }
-                this.FocusTarget(targeter);
+                this.FocusTarget(address.Value);
             }
 
             if (left) {
@@ -350,8 +360,8 @@ namespace PeepingTom {
                 this.pi.Framework.Gui.Chat.PrintChat(new XivChatEntry {
                     MessageBytes = new SeString(payloads).Encode()
                 });
-            } else if (right && present) {
-                this.Target(targeter);
+            } else if (right && address != null) {
+                this.Target(address.Value);
             }
         }
 
@@ -402,16 +412,12 @@ namespace PeepingTom {
                 .FirstOrDefault();
         }
 
-        private void Target(Actor actor) {
+        private void Target(IntPtr actor) {
             IntPtr targetPtr = this.pi.TargetModuleScanner.ResolveRelativeAddress(this.pi.TargetModuleScanner.Module.BaseAddress, 0x1c64150);
-            Marshal.WriteIntPtr(targetPtr, actor.Address);
+            Marshal.WriteIntPtr(targetPtr, actor);
         }
 
-        private void FocusTarget(Actor actor) {
-            FocusTargetRaw(actor.Address);
-        }
-
-        private void FocusTargetRaw(IntPtr ptr) {
+        private void FocusTarget(IntPtr ptr) {
             IntPtr targetPtr = this.pi.TargetModuleScanner.ResolveRelativeAddress(this.pi.TargetModuleScanner.Module.BaseAddress, 0x1c641c8);
             Marshal.WriteIntPtr(targetPtr, ptr);
         }
