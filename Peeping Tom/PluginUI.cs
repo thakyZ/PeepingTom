@@ -500,7 +500,7 @@ namespace PeepingTom {
             return this.pi.ClientState.Actors
                 .Where(actor => actor.TargetActorID == player.ActorId && actor is PlayerCharacter)
                 .Select(actor => actor as PlayerCharacter)
-                .Where(actor => this.config.LogParty || this.pi.ClientState.PartyList.All(member => member.Actor.ActorId != actor.ActorId))
+                .Where(actor => this.config.LogParty || this.pi.ClientState.PartyList.All(member => member.Actor?.ActorId != actor.ActorId))
                 .Where(actor => this.config.LogAlliance || !this.InAlliance(actor))
                 .Where(actor => this.config.LogInCombat || !this.InCombat(actor))
                 .ToArray();
