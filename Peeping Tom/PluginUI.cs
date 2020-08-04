@@ -51,213 +51,16 @@ namespace PeepingTom {
 
         public void Draw() {
             if (this.SettingsVisible) {
-                // 700x250 if setting a size
-                ImGui.SetNextWindowSize(new Vector2(700, 250));
-                if (ImGui.Begin($"{this.plugin.Name} settings", ref this.settingsVisible)) {
-                    if (ImGui.BeginTabBar("##settings-tabs")) {
-                        if (ImGui.BeginTabItem("Markers")) {
-                            bool markTargeted = this.config.MarkTargeted;
-                            if (ImGui.Checkbox("Mark your target", ref markTargeted)) {
-                                this.config.MarkTargeted = markTargeted;
-                                this.config.Save();
-                            }
-
-                            Vector4 targetedColour = this.config.TargetedColour;
-                            if (ImGui.ColorEdit4("Target mark colour", ref targetedColour)) {
-                                this.config.TargetedColour = targetedColour;
-                                this.config.Save();
-                            }
-
-                            float targetedSize = this.config.TargetedSize;
-                            if (ImGui.DragFloat("Target mark size", ref targetedSize, 0.01f, 0f, 15f)) {
-                                targetedSize = Math.Max(0f, targetedSize);
-                                this.config.TargetedSize = targetedSize;
-                                this.config.Save();
-                            }
-
-                            ImGui.Spacing();
-
-                            bool markTargeting = this.config.MarkTargeting;
-                            if (ImGui.Checkbox("Mark targeting you", ref markTargeting)) {
-                                this.config.MarkTargeting = markTargeting;
-                                this.config.Save();
-                            }
-
-                            Vector4 targetingColour = this.config.TargetingColour;
-                            if (ImGui.ColorEdit4("Targeting mark colour", ref targetingColour)) {
-                                this.config.TargetingColour = targetingColour;
-                                this.config.Save();
-                            }
-
-                            float targetingSize = this.config.TargetingSize;
-                            if (ImGui.DragFloat("Targeting mark size", ref targetingSize, 0.01f, 0f, 15f)) {
-                                targetingSize = Math.Max(0f, targetingSize);
-                                this.config.TargetingSize = targetingSize;
-                                this.config.Save();
-                            }
-
-                            ImGui.EndTabItem();
-                        }
-
-                        if (ImGui.BeginTabItem("Filters")) {
-                            bool showParty = this.config.LogParty;
-                            if (ImGui.Checkbox("Log party members", ref showParty)) {
-                                this.config.LogParty = showParty;
-                                this.config.Save();
-                            }
-
-                            bool logAlliance = this.config.LogAlliance;
-                            if (ImGui.Checkbox("Log alliance members", ref logAlliance)) {
-                                this.config.LogAlliance = logAlliance;
-                                this.config.Save();
-                            }
-
-                            bool logInCombat = this.config.LogInCombat;
-                            if (ImGui.Checkbox("Log targeters engaged in combat", ref logInCombat)) {
-                                this.config.LogInCombat = logInCombat;
-                                this.config.Save();
-                            }
-
-                            ImGui.EndTabItem();
-                        }
-
-                        if (ImGui.BeginTabItem("Behaviour")) {
-                            bool focusTarget = this.config.FocusTargetOnHover;
-                            if (ImGui.Checkbox("Focus target on hover", ref focusTarget)) {
-                                this.config.FocusTargetOnHover = focusTarget;
-                                this.config.Save();
-                            }
-
-                            bool playSound = this.config.PlaySoundOnTarget;
-                            if (ImGui.Checkbox("Play sound when targeted", ref playSound)) {
-                                this.config.PlaySoundOnTarget = playSound;
-                                this.config.Save();
-                            }
-
-                            string path = this.config.SoundPath ?? "";
-                            if (ImGui.InputText("Path to WAV file", ref path, 1_000)) {
-                                path = path.Trim();
-                                this.config.SoundPath = path.Length == 0 ? null : path;
-                                this.config.Save();
-                            }
-
-                            ImGui.Text("Leave this blank to use a built-in sound.");
-
-                            float soundCooldown = this.config.SoundCooldown;
-                            if (ImGui.DragFloat("Cooldown for sound (seconds)", ref soundCooldown, .01f, 0f, 30f)) {
-                                soundCooldown = Math.Max(0f, soundCooldown);
-                                this.config.SoundCooldown = soundCooldown;
-                                this.config.Save();
-                            }
-
-                            ImGui.EndTabItem();
-                        }
-
-                        if (ImGui.BeginTabItem("Window")) {
-                            bool allowMovement = this.config.AllowMovement;
-                            if (ImGui.Checkbox("Allow moving the main window", ref allowMovement)) {
-                                this.config.AllowMovement = allowMovement;
-                                this.config.Save();
-                            }
-
-                            ImGui.Spacing();
-
-                            bool showInCombat = this.config.ShowInCombat;
-                            if (ImGui.Checkbox("Show window while in combat", ref showInCombat)) {
-                                this.config.ShowInCombat = showInCombat;
-                                this.config.Save();
-                            }
-
-                            bool showInInstance = this.config.ShowInInstance;
-                            if (ImGui.Checkbox("Show window while in instance", ref showInInstance)) {
-                                this.config.ShowInInstance = showInInstance;
-                                this.config.Save();
-                            }
-
-                            bool showInCutscenes = this.config.ShowInCutscenes;
-                            if (ImGui.Checkbox("Show window while in cutscenes", ref showInCutscenes)) {
-                                this.config.ShowInCutscenes = showInCutscenes;
-                                this.config.Save();
-                            }
-
-                            ImGui.EndTabItem();
-                        }
-
-                        if (ImGui.BeginTabItem("History")) {
-                            bool keepHistory = this.config.KeepHistory;
-                            if (ImGui.Checkbox("Show previous targeters", ref keepHistory)) {
-                                this.config.KeepHistory = keepHistory;
-                                this.config.Save();
-                            }
-
-                            int numHistory = this.config.NumHistory;
-                            if (ImGui.InputInt("Number of previous targeters to keep", ref numHistory)) {
-                                numHistory = Math.Max(0, Math.Min(10, numHistory));
-                                this.config.NumHistory = numHistory;
-                                this.config.Save();
-                            }
-
-                            ImGui.EndTabItem();
-                        }
-
-                        if (ImGui.BeginTabItem("Debug")) {
-                            bool debugMarkers = this.config.DebugMarkers;
-                            if (ImGui.Checkbox("Debug markers", ref debugMarkers)) {
-                                this.config.DebugMarkers = debugMarkers;
-                                this.config.Save();
-                            }
-
-                            ImGui.Separator();
-
-                            if (ImGui.Button("Log targeting you")) {
-                                PlayerCharacter player = this.pi.ClientState.LocalPlayer;
-                                if (player != null) {
-                                    // loop over all players looking at the current player
-                                    var actors = this.pi.ClientState.Actors
-                                        .Where(actor => actor.TargetActorID == player.ActorId && actor is PlayerCharacter)
-                                        .Select(actor => actor as PlayerCharacter);
-                                    foreach (PlayerCharacter actor in actors) {
-                                        PlayerPayload payload = new PlayerPayload(actor.Name, actor.HomeWorld.Id);
-                                        Payload[] payloads = { payload };
-                                        this.pi.Framework.Gui.Chat.PrintChat(new XivChatEntry {
-                                            MessageBytes = new SeString(payloads).Encode()
-                                        });
-                                    }
-                                }
-                            }
-
-                            if (ImGui.Button("Log your target")) {
-                                PlayerCharacter target = GetCurrentTarget();
-
-                                if (target != null) {
-                                    PlayerPayload payload = new PlayerPayload(target.Name, target.HomeWorld.Id);
-                                    Payload[] payloads = { payload };
-                                    this.pi.Framework.Gui.Chat.PrintChat(new XivChatEntry {
-                                        MessageBytes = new SeString(payloads).Encode()
-                                    });
-                                }
-                            }
-
-                            if (this.pi.ClientState.LocalPlayer != null) {
-                                PlayerCharacter player = this.pi.ClientState.LocalPlayer;
-                                IntPtr statusPtr = this.pi.TargetModuleScanner.ResolveRelativeAddress(player.Address, 0x1901);
-                                byte status = Marshal.ReadByte(statusPtr);
-                                ImGui.Text($"Status: {status}");
-                            }
-
-                            ImGui.EndTabItem();
-                        }
-
-                        ImGui.EndTabBar();
-                    }
-
-                    ImGui.End();
-                }
+                ShowSettings();
             }
 
             bool inCombat = this.pi.ClientState.Condition[ConditionFlag.InCombat];
-            bool inInstance = this.pi.ClientState.Condition[ConditionFlag.BoundByDuty];
-            bool inCutscene = this.pi.ClientState.Condition[ConditionFlag.WatchingCutscene];
+            bool inInstance = this.pi.ClientState.Condition[ConditionFlag.BoundByDuty]
+                || this.pi.ClientState.Condition[ConditionFlag.BoundByDuty56]
+                || this.pi.ClientState.Condition[ConditionFlag.BoundByDuty95];
+            bool inCutscene = this.pi.ClientState.Condition[ConditionFlag.WatchingCutscene]
+                || this.pi.ClientState.Condition[ConditionFlag.WatchingCutscene78]
+                || this.pi.ClientState.Condition[ConditionFlag.OccupiedInCutSceneEvent];
 
             // FIXME: this could just be a boolean expression
             bool shouldBeShown = this.Visible;
@@ -270,74 +73,10 @@ namespace PeepingTom {
             }
 
             if (shouldBeShown) {
-                PlayerCharacter player = this.pi.ClientState.LocalPlayer;
-                if (player != null) {
-                    PlayerCharacter[] targeting = this.GetTargeting(player);
-                    if (this.config.PlaySoundOnTarget && targeting.Length > this.lastTargetAmount && this.CanPlaySound()) {
-                        this.soundLastPlayed = Stopwatch.GetTimestamp();
-                        this.PlaySound();
-                    }
-                    this.lastTargetAmount = targeting.Length;
-                    ImGuiWindowFlags flags = ImGuiWindowFlags.AlwaysAutoResize;
-                    if (!this.config.AllowMovement) {
-                        flags |= ImGuiWindowFlags.NoMove;
-                    }
-                    if (ImGui.Begin(this.plugin.Name, ref this.visible, flags)) {
-                        ImGui.Text("Targeting you");
-                        bool anyHovered = false;
-                        if (ImGui.ListBoxHeader("##targeting", targeting.Length, 5)) {
-                            // add the two first players for testing
-                            //foreach (PlayerCharacter p in this.pi.ClientState.Actors
-                            //    .Where(actor => actor is PlayerCharacter)
-                            //    .Skip(1)
-                            //    .Select(actor => actor as PlayerCharacter)
-                            //    .Take(2)) {
-                            //    this.AddEntry(p);
-                            //}
-                            foreach (PlayerCharacter targeter in targeting) {
-                                if (this.config.KeepHistory) {
-                                    // add the targeter to the previous list
-                                    if (this.previousTargeters.Any(old => old.ActorId == targeter.ActorId)) {
-                                        this.previousTargeters.RemoveAll(old => old.ActorId == targeter.ActorId);
-                                    }
-                                    this.previousTargeters.Insert(0, new Targeter(targeter));
-                                }
-                                this.AddEntry(new Targeter(targeter), targeter.Address, ref anyHovered);
-                            }
-                            if (this.config.KeepHistory) {
-                                // only keep the configured number of previous targeters (ignoring ones that are currently targeting)
-                                while (this.previousTargeters.Where(old => targeting.All(actor => actor.ActorId != old.ActorId)).Count() > this.config.NumHistory) {
-                                    this.previousTargeters.RemoveAt(this.previousTargeters.Count - 1);
-                                }
-                                // get a list of the previous targeters that aren't currently targeting
-                                Targeter[] previous = this.previousTargeters
-                                    .Where(old => targeting.All(actor => actor.ActorId != old.ActorId))
-                                    .Take(this.config.NumHistory)
-                                    .ToArray();
-                                // add previous targeters to the list
-                                foreach (Targeter oldTargeter in previous) {
-                                    this.AddEntry(oldTargeter, null, ref anyHovered, ImGuiSelectableFlags.Disabled);
-                                }
-                            }
-                            ImGui.ListBoxFooter();
-                        }
-                        if (this.config.FocusTargetOnHover && !anyHovered && this.previousFocus != null) {
-                            // old focus target still here
-                            if (this.pi.ClientState.Actors.Any(actor => actor.Address == this.previousFocus)) {
-                                this.FocusTarget((IntPtr)this.previousFocus);
-                            } else {
-                                this.FocusTarget(IntPtr.Zero);
-                            }
-                            this.previousFocus = null;
-                        }
-                        ImGui.Text("Click to link or right click to target.");
-                        ImGui.End();
-                    }
-                }
+                ShowMainWindow();
             }
 
             if (this.config.MarkTargeted) {
-                PlayerCharacter target = GetCurrentTarget();
                 MarkPlayer(GetCurrentTarget(), this.config.TargetedColour, this.config.TargetedSize);
             }
 
@@ -349,6 +88,281 @@ namespace PeepingTom {
                         MarkPlayer(targeter, this.config.TargetingColour, this.config.TargetingSize);
                     }
                 }
+            }
+        }
+
+        private void ShowSettings() {
+
+            // 700x250 if setting a size
+            ImGui.SetNextWindowSize(new Vector2(700, 250));
+            if (ImGui.Begin($"{this.plugin.Name} settings", ref this.settingsVisible)) {
+                if (ImGui.BeginTabBar("##settings-tabs")) {
+                    if (ImGui.BeginTabItem("Markers")) {
+                        bool markTargeted = this.config.MarkTargeted;
+                        if (ImGui.Checkbox("Mark your target", ref markTargeted)) {
+                            this.config.MarkTargeted = markTargeted;
+                            this.config.Save();
+                        }
+
+                        Vector4 targetedColour = this.config.TargetedColour;
+                        if (ImGui.ColorEdit4("Target mark colour", ref targetedColour)) {
+                            this.config.TargetedColour = targetedColour;
+                            this.config.Save();
+                        }
+
+                        float targetedSize = this.config.TargetedSize;
+                        if (ImGui.DragFloat("Target mark size", ref targetedSize, 0.01f, 0f, 15f)) {
+                            targetedSize = Math.Max(0f, targetedSize);
+                            this.config.TargetedSize = targetedSize;
+                            this.config.Save();
+                        }
+
+                        ImGui.Spacing();
+
+                        bool markTargeting = this.config.MarkTargeting;
+                        if (ImGui.Checkbox("Mark targeting you", ref markTargeting)) {
+                            this.config.MarkTargeting = markTargeting;
+                            this.config.Save();
+                        }
+
+                        Vector4 targetingColour = this.config.TargetingColour;
+                        if (ImGui.ColorEdit4("Targeting mark colour", ref targetingColour)) {
+                            this.config.TargetingColour = targetingColour;
+                            this.config.Save();
+                        }
+
+                        float targetingSize = this.config.TargetingSize;
+                        if (ImGui.DragFloat("Targeting mark size", ref targetingSize, 0.01f, 0f, 15f)) {
+                            targetingSize = Math.Max(0f, targetingSize);
+                            this.config.TargetingSize = targetingSize;
+                            this.config.Save();
+                        }
+
+                        ImGui.EndTabItem();
+                    }
+
+                    if (ImGui.BeginTabItem("Filters")) {
+                        bool showParty = this.config.LogParty;
+                        if (ImGui.Checkbox("Log party members", ref showParty)) {
+                            this.config.LogParty = showParty;
+                            this.config.Save();
+                        }
+
+                        bool logAlliance = this.config.LogAlliance;
+                        if (ImGui.Checkbox("Log alliance members", ref logAlliance)) {
+                            this.config.LogAlliance = logAlliance;
+                            this.config.Save();
+                        }
+
+                        bool logInCombat = this.config.LogInCombat;
+                        if (ImGui.Checkbox("Log targeters engaged in combat", ref logInCombat)) {
+                            this.config.LogInCombat = logInCombat;
+                            this.config.Save();
+                        }
+
+                        ImGui.EndTabItem();
+                    }
+
+                    if (ImGui.BeginTabItem("Behaviour")) {
+                        bool focusTarget = this.config.FocusTargetOnHover;
+                        if (ImGui.Checkbox("Focus target on hover", ref focusTarget)) {
+                            this.config.FocusTargetOnHover = focusTarget;
+                            this.config.Save();
+                        }
+
+                        bool playSound = this.config.PlaySoundOnTarget;
+                        if (ImGui.Checkbox("Play sound when targeted", ref playSound)) {
+                            this.config.PlaySoundOnTarget = playSound;
+                            this.config.Save();
+                        }
+
+                        string path = this.config.SoundPath ?? "";
+                        if (ImGui.InputText("Path to WAV file", ref path, 1_000)) {
+                            path = path.Trim();
+                            this.config.SoundPath = path.Length == 0 ? null : path;
+                            this.config.Save();
+                        }
+
+                        ImGui.Text("Leave this blank to use a built-in sound.");
+
+                        float soundCooldown = this.config.SoundCooldown;
+                        if (ImGui.DragFloat("Cooldown for sound (seconds)", ref soundCooldown, .01f, 0f, 30f)) {
+                            soundCooldown = Math.Max(0f, soundCooldown);
+                            this.config.SoundCooldown = soundCooldown;
+                            this.config.Save();
+                        }
+
+                        ImGui.EndTabItem();
+                    }
+
+                    if (ImGui.BeginTabItem("Window")) {
+                        bool allowMovement = this.config.AllowMovement;
+                        if (ImGui.Checkbox("Allow moving the main window", ref allowMovement)) {
+                            this.config.AllowMovement = allowMovement;
+                            this.config.Save();
+                        }
+
+                        ImGui.Spacing();
+
+                        bool showInCombat = this.config.ShowInCombat;
+                        if (ImGui.Checkbox("Show window while in combat", ref showInCombat)) {
+                            this.config.ShowInCombat = showInCombat;
+                            this.config.Save();
+                        }
+
+                        bool showInInstance = this.config.ShowInInstance;
+                        if (ImGui.Checkbox("Show window while in instance", ref showInInstance)) {
+                            this.config.ShowInInstance = showInInstance;
+                            this.config.Save();
+                        }
+
+                        bool showInCutscenes = this.config.ShowInCutscenes;
+                        if (ImGui.Checkbox("Show window while in cutscenes", ref showInCutscenes)) {
+                            this.config.ShowInCutscenes = showInCutscenes;
+                            this.config.Save();
+                        }
+
+                        ImGui.EndTabItem();
+                    }
+
+                    if (ImGui.BeginTabItem("History")) {
+                        bool keepHistory = this.config.KeepHistory;
+                        if (ImGui.Checkbox("Show previous targeters", ref keepHistory)) {
+                            this.config.KeepHistory = keepHistory;
+                            this.config.Save();
+                        }
+
+                        int numHistory = this.config.NumHistory;
+                        if (ImGui.InputInt("Number of previous targeters to keep", ref numHistory)) {
+                            numHistory = Math.Max(0, Math.Min(10, numHistory));
+                            this.config.NumHistory = numHistory;
+                            this.config.Save();
+                        }
+
+                        ImGui.EndTabItem();
+                    }
+
+                    if (ImGui.BeginTabItem("Debug")) {
+                        bool debugMarkers = this.config.DebugMarkers;
+                        if (ImGui.Checkbox("Debug markers", ref debugMarkers)) {
+                            this.config.DebugMarkers = debugMarkers;
+                            this.config.Save();
+                        }
+
+                        ImGui.Separator();
+
+                        if (ImGui.Button("Log targeting you")) {
+                            PlayerCharacter player = this.pi.ClientState.LocalPlayer;
+                            if (player != null) {
+                                // loop over all players looking at the current player
+                                var actors = this.pi.ClientState.Actors
+                                    .Where(actor => actor.TargetActorID == player.ActorId && actor is PlayerCharacter)
+                                    .Select(actor => actor as PlayerCharacter);
+                                foreach (PlayerCharacter actor in actors) {
+                                    PlayerPayload payload = new PlayerPayload(this.pi.Data, actor.Name, actor.HomeWorld.Id);
+                                    Payload[] payloads = { payload };
+                                    this.pi.Framework.Gui.Chat.PrintChat(new XivChatEntry {
+                                        MessageBytes = new SeString(payloads).Encode()
+                                    });
+                                }
+                            }
+                        }
+
+                        if (ImGui.Button("Log your target")) {
+                            PlayerCharacter target = GetCurrentTarget();
+
+                            if (target != null) {
+                                PlayerPayload payload = new PlayerPayload(this.pi.Data, target.Name, target.HomeWorld.Id);
+                                Payload[] payloads = { payload };
+                                this.pi.Framework.Gui.Chat.PrintChat(new XivChatEntry {
+                                    MessageBytes = new SeString(payloads).Encode()
+                                });
+                            }
+                        }
+
+                        if (this.pi.ClientState.LocalPlayer != null) {
+                            PlayerCharacter player = this.pi.ClientState.LocalPlayer;
+                            IntPtr statusPtr = this.pi.TargetModuleScanner.ResolveRelativeAddress(player.Address, 0x1901);
+                            byte status = Marshal.ReadByte(statusPtr);
+                            ImGui.Text($"Status: {status}");
+                        }
+
+                        ImGui.EndTabItem();
+                    }
+
+                    ImGui.EndTabBar();
+                }
+
+                ImGui.End();
+            }
+        }
+
+        private void ShowMainWindow() {
+            PlayerCharacter player = this.pi.ClientState.LocalPlayer;
+            if (player == null) {
+                return;
+            }
+
+            PlayerCharacter[] targeting = this.GetTargeting(player);
+            if (this.config.PlaySoundOnTarget && targeting.Length > this.lastTargetAmount && this.CanPlaySound()) {
+                this.soundLastPlayed = Stopwatch.GetTimestamp();
+                this.PlaySound();
+            }
+            this.lastTargetAmount = targeting.Length;
+            ImGuiWindowFlags flags = ImGuiWindowFlags.AlwaysAutoResize;
+            if (!this.config.AllowMovement) {
+                flags |= ImGuiWindowFlags.NoMove;
+            }
+            if (ImGui.Begin(this.plugin.Name, ref this.visible, flags)) {
+                ImGui.Text("Targeting you");
+                bool anyHovered = false;
+                if (ImGui.ListBoxHeader("##targeting", targeting.Length, 5)) {
+                    // add the two first players for testing
+                    //foreach (PlayerCharacter p in this.pi.ClientState.Actors
+                    //    .Where(actor => actor is PlayerCharacter)
+                    //    .Skip(1)
+                    //    .Select(actor => actor as PlayerCharacter)
+                    //    .Take(2)) {
+                    //    this.AddEntry(p);
+                    //}
+                    foreach (PlayerCharacter targeter in targeting) {
+                        if (this.config.KeepHistory) {
+                            // add the targeter to the previous list
+                            if (this.previousTargeters.Any(old => old.ActorId == targeter.ActorId)) {
+                                this.previousTargeters.RemoveAll(old => old.ActorId == targeter.ActorId);
+                            }
+                            this.previousTargeters.Insert(0, new Targeter(targeter));
+                        }
+                        this.AddEntry(new Targeter(targeter), targeter.Address, ref anyHovered);
+                    }
+                    if (this.config.KeepHistory) {
+                        // only keep the configured number of previous targeters (ignoring ones that are currently targeting)
+                        while (this.previousTargeters.Where(old => targeting.All(actor => actor.ActorId != old.ActorId)).Count() > this.config.NumHistory) {
+                            this.previousTargeters.RemoveAt(this.previousTargeters.Count - 1);
+                        }
+                        // get a list of the previous targeters that aren't currently targeting
+                        Targeter[] previous = this.previousTargeters
+                            .Where(old => targeting.All(actor => actor.ActorId != old.ActorId))
+                            .Take(this.config.NumHistory)
+                            .ToArray();
+                        // add previous targeters to the list
+                        foreach (Targeter oldTargeter in previous) {
+                            this.AddEntry(oldTargeter, null, ref anyHovered, ImGuiSelectableFlags.Disabled);
+                        }
+                    }
+                    ImGui.ListBoxFooter();
+                }
+                if (this.config.FocusTargetOnHover && !anyHovered && this.previousFocus != null) {
+                    // old focus target still here
+                    if (this.pi.ClientState.Actors.Any(actor => actor.Address == this.previousFocus)) {
+                        this.FocusTarget((IntPtr)this.previousFocus);
+                    } else {
+                        this.FocusTarget(IntPtr.Zero);
+                    }
+                    this.previousFocus = null;
+                }
+                ImGui.Text("Click to link or right click to target.");
+                ImGui.End();
             }
         }
 
@@ -373,7 +387,7 @@ namespace PeepingTom {
             }
 
             if (left) {
-                PlayerPayload payload = new PlayerPayload(targeter.Name, targeter.HomeWorld.Id);
+                PlayerPayload payload = new PlayerPayload(this.pi.Data, targeter.Name, targeter.HomeWorld.Id);
                 Payload[] payloads = { payload };
                 this.pi.Framework.Gui.Chat.PrintChat(new XivChatEntry {
                     MessageBytes = new SeString(payloads).Encode()
