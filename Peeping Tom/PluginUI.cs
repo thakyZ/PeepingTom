@@ -464,14 +464,14 @@ namespace PeepingTom {
             } else {
                 player = new SoundPlayer(this.config.SoundPath);
             }
-            try {
-                player.Play();
-            } catch (FileNotFoundException e) {
-                this.SendError($"Could not play sound: {e.Message}");
-            } catch (InvalidOperationException e) {
-                this.SendError($"Could not play sound: {e.Message}");
-            } finally {
-                player.Dispose();
+            using (player) {
+                try {
+                    player.Play();
+                } catch (FileNotFoundException e) {
+                    this.SendError($"Could not play sound: {e.Message}");
+                } catch (InvalidOperationException e) {
+                    this.SendError($"Could not play sound: {e.Message}");
+                }
             }
         }
 
