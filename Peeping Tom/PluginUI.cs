@@ -370,13 +370,17 @@ namespace PeepingTom {
         private void AddEntry(Targeter targeter, Actor actor, ref bool anyHovered, ImGuiSelectableFlags flags = ImGuiSelectableFlags.None) {
             ImGui.Selectable(targeter.Name, false, flags);
             bool hover = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled);
-            anyHovered |= hover;
             bool left = hover && ImGui.IsMouseClicked(0);
             bool right = hover && ImGui.IsMouseClicked(1);
             if (actor == null) {
                 actor = this.pi.ClientState.Actors
                     .Where(a => a.ActorId == targeter.ActorId)
                     .FirstOrDefault();
+            }
+
+            // don't count as hovered if the actor isn't here (clears focus target when hovering missing actors)
+            if (actor != null) {
+                anyHovered |= hover;
             }
 
             if (this.config.FocusTargetOnHover && hover && actor != null) {
