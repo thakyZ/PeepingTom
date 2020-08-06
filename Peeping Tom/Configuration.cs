@@ -30,6 +30,7 @@ namespace PeepingTom {
         public bool LogParty { get; set; } = true;
         public bool LogAlliance { get; set; } = false;
         public bool LogInCombat { get; set; } = false;
+        public bool LogSelf { get; set; } = false;
 
         public bool FocusTargetOnHover { get; set; } = true;
         public bool PlaySoundOnTarget { get; set; } = false;

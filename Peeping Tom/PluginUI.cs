@@ -160,6 +160,12 @@ namespace PeepingTom {
                             this.config.Save();
                         }
 
+                        bool logSelf = this.config.LogSelf;
+                        if (ImGui.Checkbox("Log yourself", ref logSelf)) {
+                            this.config.LogSelf = logSelf;
+                            this.config.Save();
+                        }
+
                         ImGui.EndTabItem();
                     }
 
@@ -506,6 +512,7 @@ namespace PeepingTom {
                 .Where(actor => this.config.LogParty || this.pi.ClientState.PartyList.All(member => member.Actor?.ActorId != actor.ActorId))
                 .Where(actor => this.config.LogAlliance || !this.InAlliance(actor))
                 .Where(actor => this.config.LogInCombat || !this.InCombat(actor))
+                .Where(actor => this.config.LogSelf || actor.ActorId != player.ActorId)
                 .ToArray();
         }
     }
