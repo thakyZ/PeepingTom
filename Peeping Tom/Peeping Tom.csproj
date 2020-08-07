@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="Configuration.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="HookManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="PluginUI.cs" />
     <Compile Include="Targeting.cs" />

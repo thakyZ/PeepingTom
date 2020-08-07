@@ -92,7 +92,6 @@ namespace PeepingTom {
         }
 
         private void ShowSettings() {
-
             // 700x250 if setting a size
             ImGui.SetNextWindowSize(new Vector2(700, 250));
             if (ImGui.Begin($"{this.plugin.Name} settings", ref this.settingsVisible)) {
@@ -202,6 +201,12 @@ namespace PeepingTom {
                     }
 
                     if (ImGui.BeginTabItem("Window")) {
+                        bool openOnLogin = this.config.OpenOnLogin;
+                        if (ImGui.Checkbox("Open on login", ref openOnLogin)) {
+                            this.config.OpenOnLogin = openOnLogin;
+                            this.config.Save();
+                        }
+
                         bool allowMovement = this.config.AllowMovement;
                         if (ImGui.Checkbox("Allow moving the main window", ref allowMovement)) {
                             this.config.AllowMovement = allowMovement;
