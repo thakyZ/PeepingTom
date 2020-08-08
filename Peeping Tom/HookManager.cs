@@ -46,6 +46,7 @@ namespace PeepingTom {
             this.logoutHook.Original(ptr);
 
             this.plugin.Ui.Visible = false;
+            this.plugin.Watcher.ClearPrevious();
         }
 
         public void Dispose() {

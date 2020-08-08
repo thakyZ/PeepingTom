@@ -46,11 +46,10 @@ namespace PeepingTom {
             this.plugin = plugin ?? throw new ArgumentNullException(nameof(plugin), "PeepingTomPlugin cannot be null");
         }
 
-        public Out WithCurrent<Out>(Func<IReadOnlyCollection<PlayerCharacter>, Out> func) {
-            this.currentMutex.WaitOne();
-            Out output = func(this.current);
-            this.currentMutex.ReleaseMutex();
-            return output;
+        public void ClearPrevious() {
+            this.previousMutex.WaitOne();
+            this.previousTargeters.Clear();
+            this.previousMutex.ReleaseMutex();
         }
 
         public void OnFrameworkUpdate(Framework framework) {
