@@ -72,6 +72,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="TargetWatcher.cs" />
     <Compile Include="Util.cs" />
   </ItemGroup>
   <ItemGroup>

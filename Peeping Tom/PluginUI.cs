@@ -19,11 +19,9 @@ namespace PeepingTom {
         private readonly PeepingTomPlugin plugin;
         private readonly Configuration config;
         private readonly DalamudPluginInterface pi;
+        private readonly TargetWatcher watcher;
 
-        private readonly List<Targeter> previousTargeters = new List<Targeter>();
         private Optional<Actor> previousFocus = new Optional<Actor>();
-        private long soundLastPlayed = 0;
-        private int lastTargetAmount = 0;
 
         private bool visible = false;
         public bool Visible {
@@ -37,16 +35,16 @@ namespace PeepingTom {
             set { this.settingsVisible = value; }
         }
 
-        public PluginUI(PeepingTomPlugin plugin, Configuration config, DalamudPluginInterface pluginInterface) {
+        public PluginUI(PeepingTomPlugin plugin, Configuration config, DalamudPluginInterface pluginInterface, TargetWatcher watcher) {
             this.plugin = plugin;
             this.config = config;
             this.pi = pluginInterface;
+            this.watcher = watcher;
         }
 
         public void Dispose() {
             this.Visible = false;
             this.SettingsVisible = false;
-            this.previousTargeters.Clear();
         }
 
         public void Draw() {
@@ -83,7 +81,7 @@ namespace PeepingTom {
             if (this.config.MarkTargeting) {
                 PlayerCharacter player = this.pi.ClientState.LocalPlayer;
                 if (player != null) {
-                    PlayerCharacter[] targeting = this.GetTargeting(player);
+                    IReadOnlyCollection<PlayerCharacter> targeting = this.watcher.CurrentTargeters;
                     foreach (PlayerCharacter targeter in targeting) {
                         MarkPlayer(targeter, this.config.TargetingColour, this.config.TargetingSize);
                     }
@@ -309,17 +307,8 @@ namespace PeepingTom {
         }
 
         private void ShowMainWindow() {
-            PlayerCharacter player = this.pi.ClientState.LocalPlayer;
-            if (player == null) {
-                return;
-            }
-
-            PlayerCharacter[] targeting = this.GetTargeting(player);
-            if (this.config.PlaySoundOnTarget && targeting.Length > this.lastTargetAmount && this.CanPlaySound()) {
-                this.soundLastPlayed = Stopwatch.GetTimestamp();
-                this.PlaySound();
-            }
-            this.lastTargetAmount = targeting.Length;
+            IReadOnlyCollection<PlayerCharacter> targeting = this.watcher.CurrentTargeters;
+            
             ImGuiWindowFlags flags = ImGuiWindowFlags.AlwaysAutoResize;
             if (!this.config.AllowMovement) {
                 flags |= ImGuiWindowFlags.NoMove;
@@ -327,7 +316,7 @@ namespace PeepingTom {
             if (ImGui.Begin(this.plugin.Name, ref this.visible, flags)) {
                 ImGui.Text("Targeting you");
                 bool anyHovered = false;
-                if (ImGui.ListBoxHeader("##targeting", targeting.Length, 5)) {
+                if (ImGui.ListBoxHeader("##targeting", targeting.Count, 5)) {
                     // add the two first players for testing
                     //foreach (PlayerCharacter p in this.pi.ClientState.Actors
                     //    .Where(actor => actor is PlayerCharacter)
@@ -337,22 +326,11 @@ namespace PeepingTom {
                     //    this.AddEntry(new Targeter(p), p, ref anyHovered);
                     //}
                     foreach (PlayerCharacter targeter in targeting) {
-                        if (this.config.KeepHistory) {
-                            // add the targeter to the previous list
-                            if (this.previousTargeters.Any(old => old.ActorId == targeter.ActorId)) {
-                                this.previousTargeters.RemoveAll(old => old.ActorId == targeter.ActorId);
-                            }
-                            this.previousTargeters.Insert(0, new Targeter(targeter));
-                        }
                         this.AddEntry(new Targeter(targeter), targeter, ref anyHovered);
                     }
                     if (this.config.KeepHistory) {
-                        // only keep the configured number of previous targeters (ignoring ones that are currently targeting)
-                        while (this.previousTargeters.Where(old => targeting.All(actor => actor.ActorId != old.ActorId)).Count() > this.config.NumHistory) {
-                            this.previousTargeters.RemoveAt(this.previousTargeters.Count - 1);
-                        }
                         // get a list of the previous targeters that aren't currently targeting
-                        Targeter[] previous = this.previousTargeters
+                        Targeter[] previous = this.watcher.PreviousTargeters
                             .Where(old => targeting.All(actor => actor.ActorId != old.ActorId))
                             .Take(this.config.NumHistory)
                             .ToArray();
@@ -457,68 +435,6 @@ namespace PeepingTom {
                 .Where(actor => actor.ActorId == targetId && actor is PlayerCharacter)
                 .Select(actor => actor as PlayerCharacter)
                 .FirstOrDefault();
-        }
-
-        private bool CanPlaySound() {
-            if (this.soundLastPlayed == 0) {
-                return true;
-            }
-
-            long current = Stopwatch.GetTimestamp();
-            long diff = current - this.soundLastPlayed;
-            // only play every 10 seconds?
-            float secs = (float)diff / Stopwatch.Frequency;
-            return secs >= this.config.SoundCooldown;
-        }
-
-        private void PlaySound() {
-            SoundPlayer player;
-            if (this.config.SoundPath == null) {
-                player = new SoundPlayer(Properties.Resources.Target);
-            } else {
-                player = new SoundPlayer(this.config.SoundPath);
-            }
-            using (player) {
-                try {
-                    player.Play();
-                } catch (FileNotFoundException e) {
-                    this.SendError($"Could not play sound: {e.Message}");
-                } catch (InvalidOperationException e) {
-                    this.SendError($"Could not play sound: {e.Message}");
-                }
-            }
-        }
-
-        private void SendError(string message) {
-            Payload[] payloads = { new TextPayload($"[Who's Looking] {message}") };
-            this.pi.Framework.Gui.Chat.PrintChat(new XivChatEntry {
-                MessageBytes = new SeString(payloads).Encode(),
-                Type = XivChatType.ErrorMessage
-            });
-        }
-
-        private byte GetStatus(Actor actor) {
-            IntPtr statusPtr = this.pi.TargetModuleScanner.ResolveRelativeAddress(actor.Address, 0x1901);
-            return Marshal.ReadByte(statusPtr);
-        }
-
-        private bool InCombat(Actor actor) {
-            return (GetStatus(actor) & 2) > 0;
-        }
-
-        private bool InAlliance(Actor actor) {
-            return (GetStatus(actor) & 32) > 0;
-        }
-
-        private PlayerCharacter[] GetTargeting(Actor player) {
-            return this.pi.ClientState.Actors
-                .Where(actor => actor.TargetActorID == player.ActorId && actor is PlayerCharacter)
-                .Select(actor => actor as PlayerCharacter)
-                .Where(actor => this.config.LogParty || this.pi.ClientState.PartyList.All(member => member.Actor?.ActorId != actor.ActorId))
-                .Where(actor => this.config.LogAlliance || !this.InAlliance(actor))
-                .Where(actor => this.config.LogInCombat || !this.InCombat(actor))
-                .Where(actor => this.config.LogSelf || actor.ActorId != player.ActorId)
-                .ToArray();
         }
     }
 }

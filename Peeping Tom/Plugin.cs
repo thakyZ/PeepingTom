@@ -10,12 +10,14 @@ namespace PeepingTom {
         private Configuration config;
         private PluginUI ui;
         private HookManager hookManager;
+        private TargetWatcher watcher;
 
         public void Initialize(DalamudPluginInterface pluginInterface) {
             this.pi = pluginInterface ?? throw new ArgumentNullException(nameof(pluginInterface), "DalamudPluginInterface argument was null");
             this.config = this.pi.GetPluginConfig() as Configuration ?? new Configuration();
             this.config.Initialize(this.pi);
-            this.ui = new PluginUI(this, this.config, this.pi);
+            this.watcher = new TargetWatcher(this.pi, this.config);
+            this.ui = new PluginUI(this, this.config, this.pi, this.watcher);
             this.hookManager = new HookManager(this.pi, this.ui, this.config);
 
             this.pi.CommandManager.AddHandler("/ppeepingtom", new CommandInfo(this.OnCommand) {
@@ -28,6 +30,7 @@ namespace PeepingTom {
                 HelpMessage = "Alias for /ppeepingtom"
             });
 
+            this.pi.Framework.OnUpdateEvent += this.watcher.OnFrameworkUpdate;
             this.pi.UiBuilder.OnBuildUi += this.DrawUI;
             this.pi.UiBuilder.OnOpenConfigUi += this.ConfigUI;
         }
@@ -42,6 +45,8 @@ namespace PeepingTom {
 
         protected virtual void Dispose(bool includeManaged) {
             this.hookManager.Dispose();
+            this.pi.Framework.OnUpdateEvent -= this.watcher.OnFrameworkUpdate;
+            this.watcher.Dispose();
             this.pi.UiBuilder.OnBuildUi -= DrawUI;
             this.pi.UiBuilder.OnOpenConfigUi -= ConfigUI;
             this.pi.CommandManager.RemoveHandler("/ppeepingtom");
