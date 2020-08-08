@@ -17,7 +17,7 @@ namespace PeepingTom {
     class TargetWatcher : IDisposable {
         private readonly PeepingTomPlugin plugin;
 
-        private long soundLastPlayed = 0;
+        private Stopwatch watch = null;
         private int lastTargetAmount = 0;
 
         private volatile bool stop = false;
@@ -113,7 +113,7 @@ namespace PeepingTom {
 
             // play sound if necessary
             if (this.CanPlaySound()) {
-                this.soundLastPlayed = Stopwatch.GetTimestamp();
+                this.watch.Restart();
                 this.PlaySound();
             }
             this.lastTargetAmount = this.current.Length;
@@ -180,14 +180,12 @@ namespace PeepingTom {
                 return false;
             }
 
-            if (this.soundLastPlayed == 0) {
+            if (this.watch == null) {
+                this.watch = new Stopwatch();
                 return true;
             }
 
-            long current = Stopwatch.GetTimestamp();
-            long diff = current - this.soundLastPlayed;
-            // only play every 10 seconds?
-            float secs = (float)diff / Stopwatch.Frequency;
+            double secs = this.watch.Elapsed.TotalSeconds;
             return secs >= this.plugin.Config.SoundCooldown;
         }
 
