@@ -3,13 +3,11 @@ using Dalamud.Game.Chat.SeStringHandling;
 using Dalamud.Game.Chat.SeStringHandling.Payloads;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Actors.Types;
-using Dalamud.Plugin;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace PeepingTom {
@@ -326,17 +324,15 @@ namespace PeepingTom {
 
         private void ShowMainWindow() {
             IReadOnlyCollection<Targeter> targeting = this.plugin.Watcher.CurrentTargeters;
+            IReadOnlyCollection<Targeter> previousTargeters = this.plugin.Config.KeepHistory ? this.plugin.Watcher.PreviousTargeters : null;
 
             // to prevent looping over a subset of the actors repeatedly when multiple people are targeting,
             // create a dictionary for O(1) lookups by actor id
             Dictionary<int, Actor> actors = null;
-            if (targeting.Count > 1) {
-                FieldInfo field = typeof(Actor).GetField("actorStruct", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (targeting.Count + (previousTargeters?.Count ?? 0) > 1) {
                 actors = this.plugin.Interface.ClientState.Actors
                     // only take into account players
                     .Where(actor => actor.ObjectKind == Dalamud.Game.ClientState.Actors.ObjectKind.Player)
-                    // filter out minions
-                    .Where(actor => ((Dalamud.Game.ClientState.Structs.Actor)field.GetValue(actor)).PlayerTargetStatus == 2)
                     .ToDictionary(actor => actor.ActorId);
             }
             
@@ -363,7 +359,7 @@ namespace PeepingTom {
                     }
                     if (this.plugin.Config.KeepHistory) {
                         // get a list of the previous targeters that aren't currently targeting
-                        Targeter[] previous = this.plugin.Watcher.PreviousTargeters
+                        Targeter[] previous = previousTargeters
                             .Where(old => targeting.All(actor => actor.ActorId != old.ActorId))
                             .Take(this.plugin.Config.NumHistory)
                             .ToArray();
