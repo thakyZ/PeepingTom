@@ -25,6 +25,7 @@ namespace PeepingTom {
         public bool DebugMarkers { get; set; } = false;
 
         public bool KeepHistory { get; set; } = true;
+        public bool HistoryWhenClosed { get; set; } = true;
         public int NumHistory { get; set; } = 5;
 
         public bool LogParty { get; set; } = true;
@@ -36,6 +37,7 @@ namespace PeepingTom {
         public bool PlaySoundOnTarget { get; set; } = false;
         public string SoundPath { get; set; } = null;
         public float SoundCooldown { get; set; } = 10f;
+        public bool PlaySoundWhenClosed { get; set; } = false;
 
         public bool OpenOnLogin { get; set; } = false;
         public bool AllowMovement { get; set; } = true;

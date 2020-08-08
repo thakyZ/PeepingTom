@@ -7,10 +7,7 @@ using Dalamud.Plugin;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Media;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -195,6 +192,12 @@ namespace PeepingTom {
                             this.config.Save();
                         }
 
+                        bool playWhenClosed = this.config.PlaySoundWhenClosed;
+                        if (ImGui.Checkbox("Play sound when window is closed", ref playWhenClosed)) {
+                            this.config.PlaySoundWhenClosed = playWhenClosed;
+                            this.config.Save();
+                        }
+
                         ImGui.EndTabItem();
                     }
 
@@ -238,6 +241,12 @@ namespace PeepingTom {
                         bool keepHistory = this.config.KeepHistory;
                         if (ImGui.Checkbox("Show previous targeters", ref keepHistory)) {
                             this.config.KeepHistory = keepHistory;
+                            this.config.Save();
+                        }
+
+                        bool historyWhenClosed = this.config.HistoryWhenClosed;
+                        if (ImGui.Checkbox("Record history when window is closed", ref historyWhenClosed)) {
+                            this.config.HistoryWhenClosed = historyWhenClosed;
                             this.config.Save();
                         }
 

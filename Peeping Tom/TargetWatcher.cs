@@ -11,14 +11,11 @@ using System.IO;
 using System.Linq;
 using System.Media;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace PeepingTom {
     class TargetWatcher : IDisposable {
-        private readonly DalamudPluginInterface pi;
-        private readonly Configuration config;
+        private readonly PeepingTomPlugin plugin;
 
         private long soundLastPlayed = 0;
         private int lastTargetAmount = 0;
@@ -45,9 +42,8 @@ namespace PeepingTom {
             }
         }
 
-        public TargetWatcher(DalamudPluginInterface pi, Configuration config) {
-            this.pi = pi ?? throw new ArgumentNullException(nameof(pi), "DalamudPluginInterface cannot be null");
-            this.config = config ?? throw new ArgumentNullException(nameof(config), "Configuration cannot be null");
+        public TargetWatcher(PeepingTomPlugin plugin) {
+            this.plugin = plugin ?? throw new ArgumentNullException(nameof(plugin), "PeepingTomPlugin cannot be null");
         }
 
         public Out WithCurrent<Out>(Func<IReadOnlyCollection<PlayerCharacter>, Out> func) {
@@ -58,7 +54,7 @@ namespace PeepingTom {
         }
 
         public void OnFrameworkUpdate(Framework framework) {
-            PlayerCharacter player = this.pi.ClientState.LocalPlayer;
+            PlayerCharacter player = this.plugin.Interface.ClientState.LocalPlayer;
             if (player == null) {
                 return;
             }
@@ -76,7 +72,7 @@ namespace PeepingTom {
             this.HandleHistory(current);
 
             // play sound if necessary
-            if (this.config.PlaySoundOnTarget && this.current.Length > this.lastTargetAmount && this.CanPlaySound()) {
+            if (this.CanPlaySound()) {
                 this.soundLastPlayed = Stopwatch.GetTimestamp();
                 this.PlaySound();
             }
@@ -84,7 +80,7 @@ namespace PeepingTom {
         }
 
         private void HandleHistory(PlayerCharacter[] targeting) {
-            if (!this.config.KeepHistory) {
+            if (!this.plugin.Config.KeepHistory || (!this.plugin.Config.HistoryWhenClosed && !this.plugin.Ui.Visible)) {
                 return;
             }
 
@@ -97,24 +93,24 @@ namespace PeepingTom {
             }
 
             // only keep the configured number of previous targeters (ignoring ones that are currently targeting)
-            while (this.previousTargeters.Where(old => targeting.All(actor => actor.ActorId != old.ActorId)).Count() > this.config.NumHistory) {
+            while (this.previousTargeters.Where(old => targeting.All(actor => actor.ActorId != old.ActorId)).Count() > this.plugin.Config.NumHistory) {
                 this.previousTargeters.RemoveAt(this.previousTargeters.Count - 1);
             }
         }
 
         private PlayerCharacter[] GetTargeting(Actor player) {
-            return this.pi.ClientState.Actors
+            return this.plugin.Interface.ClientState.Actors
                 .Where(actor => actor.TargetActorID == player.ActorId && actor is PlayerCharacter)
                 .Select(actor => actor as PlayerCharacter)
-                .Where(actor => this.config.LogParty || this.pi.ClientState.PartyList.All(member => member.Actor?.ActorId != actor.ActorId))
-                .Where(actor => this.config.LogAlliance || !this.InAlliance(actor))
-                .Where(actor => this.config.LogInCombat || !this.InCombat(actor))
-                .Where(actor => this.config.LogSelf || actor.ActorId != player.ActorId)
+                .Where(actor => this.plugin.Config.LogParty || this.plugin.Interface.ClientState.PartyList.All(member => member.Actor?.ActorId != actor.ActorId))
+                .Where(actor => this.plugin.Config.LogAlliance || !this.InAlliance(actor))
+                .Where(actor => this.plugin.Config.LogInCombat || !this.InCombat(actor))
+                .Where(actor => this.plugin.Config.LogSelf || actor.ActorId != player.ActorId)
                 .ToArray();
         }
 
         private byte GetStatus(Actor actor) {
-            IntPtr statusPtr = this.pi.TargetModuleScanner.ResolveRelativeAddress(actor.Address, 0x1901);
+            IntPtr statusPtr = this.plugin.Interface.TargetModuleScanner.ResolveRelativeAddress(actor.Address, 0x1901);
             return Marshal.ReadByte(statusPtr);
         }
 
@@ -127,6 +123,18 @@ namespace PeepingTom {
         }
 
         private bool CanPlaySound() {
+            if (!this.plugin.Config.PlaySoundOnTarget) {
+                return false;
+            }
+
+            if (this.current.Length <= this.lastTargetAmount) {
+                return false;
+            }
+
+            if (!this.plugin.Config.PlaySoundWhenClosed && !this.plugin.Ui.Visible) {
+                return false;
+            }
+
             if (this.soundLastPlayed == 0) {
                 return true;
             }
@@ -135,15 +143,15 @@ namespace PeepingTom {
             long diff = current - this.soundLastPlayed;
             // only play every 10 seconds?
             float secs = (float)diff / Stopwatch.Frequency;
-            return secs >= this.config.SoundCooldown;
+            return secs >= this.plugin.Config.SoundCooldown;
         }
 
         private void PlaySound() {
             SoundPlayer player;
-            if (this.config.SoundPath == null) {
+            if (this.plugin.Config.SoundPath == null) {
                 player = new SoundPlayer(Properties.Resources.Target);
             } else {
-                player = new SoundPlayer(this.config.SoundPath);
+                player = new SoundPlayer(this.plugin.Config.SoundPath);
             }
             using (player) {
                 try {
@@ -158,7 +166,7 @@ namespace PeepingTom {
 
         private void SendError(string message) {
             Payload[] payloads = { new TextPayload($"[Who's Looking] {message}") };
-            this.pi.Framework.Gui.Chat.PrintChat(new XivChatEntry {
+            this.plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
                 MessageBytes = new SeString(payloads).Encode(),
                 Type = XivChatType.ErrorMessage
             });
