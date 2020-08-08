@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace PeepingTom {
@@ -72,7 +73,11 @@ namespace PeepingTom {
             if (this.plugin.Config.MarkTargeting) {
                 PlayerCharacter player = this.plugin.Interface.ClientState.LocalPlayer;
                 if (player != null) {
-                    IReadOnlyCollection<PlayerCharacter> targeting = this.plugin.Watcher.CurrentTargeters;
+                    PlayerCharacter[] targeting = this.plugin.Watcher.CurrentTargeters
+                        .Select(targeter => this.plugin.Interface.ClientState.Actors.FirstOrDefault(actor => actor.ActorId == targeter.ActorId))
+                        .Where(targeter => targeter != null)
+                        .Select(targeter => targeter as PlayerCharacter)
+                        .ToArray();
                     foreach (PlayerCharacter targeter in targeting) {
                         MarkPlayer(targeter, this.plugin.Config.TargetingColour, this.plugin.Config.TargetingSize);
                     }
@@ -254,6 +259,16 @@ namespace PeepingTom {
                         ImGui.EndTabItem();
                     }
 
+                    if (ImGui.BeginTabItem("Advanced")) {
+                        int pollFrequency = this.plugin.Config.PollFrequency;
+                        if (ImGui.DragInt("Poll frequency in milliseconds", ref pollFrequency, .1f, 1, 1600)) {
+                            this.plugin.Config.PollFrequency = pollFrequency;
+                            this.plugin.Config.Save();
+                        }
+
+                        ImGui.EndTabItem();
+                    }
+
                     if (ImGui.BeginTabItem("Debug")) {
                         bool debugMarkers = this.plugin.Config.DebugMarkers;
                         if (ImGui.Checkbox("Debug markers", ref debugMarkers)) {
@@ -310,7 +325,20 @@ namespace PeepingTom {
         }
 
         private void ShowMainWindow() {
-            IReadOnlyCollection<PlayerCharacter> targeting = this.plugin.Watcher.CurrentTargeters;
+            IReadOnlyCollection<Targeter> targeting = this.plugin.Watcher.CurrentTargeters;
+
+            // to prevent looping over a subset of the actors repeatedly when multiple people are targeting,
+            // create a dictionary for O(1) lookups by actor id
+            Dictionary<int, Actor> actors = null;
+            if (targeting.Count > 1) {
+                FieldInfo field = typeof(Actor).GetField("actorStruct", BindingFlags.Instance | BindingFlags.NonPublic);
+                actors = this.plugin.Interface.ClientState.Actors
+                    // only take into account players
+                    .Where(actor => actor.ObjectKind == Dalamud.Game.ClientState.Actors.ObjectKind.Player)
+                    // filter out minions
+                    .Where(actor => ((Dalamud.Game.ClientState.Structs.Actor)field.GetValue(actor)).PlayerTargetStatus == 2)
+                    .ToDictionary(actor => actor.ActorId);
+            }
             
             ImGuiWindowFlags flags = ImGuiWindowFlags.AlwaysAutoResize;
             if (!this.plugin.Config.AllowMovement) {
@@ -328,8 +356,10 @@ namespace PeepingTom {
                     //    .Take(2)) {
                     //    this.AddEntry(new Targeter(p), p, ref anyHovered);
                     //}
-                    foreach (PlayerCharacter targeter in targeting) {
-                        this.AddEntry(new Targeter(targeter), targeter, ref anyHovered);
+                    foreach (Targeter targeter in targeting) {
+                        Actor actor = null;
+                        actors?.TryGetValue(targeter.ActorId, out actor);
+                        this.AddEntry(targeter, actor, ref anyHovered);
                     }
                     if (this.plugin.Config.KeepHistory) {
                         // get a list of the previous targeters that aren't currently targeting
@@ -339,7 +369,9 @@ namespace PeepingTom {
                             .ToArray();
                         // add previous targeters to the list
                         foreach (Targeter oldTargeter in previous) {
-                            this.AddEntry(oldTargeter, null, ref anyHovered, ImGuiSelectableFlags.Disabled);
+                            Actor actor = null;
+                            actors?.TryGetValue(oldTargeter.ActorId, out actor);
+                            this.AddEntry(oldTargeter, actor, ref anyHovered, ImGuiSelectableFlags.Disabled);
                         }
                     }
                     ImGui.ListBoxFooter();
@@ -364,6 +396,7 @@ namespace PeepingTom {
             bool hover = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled);
             bool left = hover && ImGui.IsMouseClicked(0);
             bool right = hover && ImGui.IsMouseClicked(1);
+
             if (actor == null) {
                 actor = this.plugin.Interface.ClientState.Actors
                     .Where(a => a.ActorId == targeter.ActorId)

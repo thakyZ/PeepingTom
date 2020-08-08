@@ -33,6 +33,8 @@ namespace PeepingTom {
             this.Interface.Framework.OnUpdateEvent += this.Watcher.OnFrameworkUpdate;
             this.Interface.UiBuilder.OnBuildUi += this.DrawUI;
             this.Interface.UiBuilder.OnOpenConfigUi += this.ConfigUI;
+
+            this.Watcher.StartThread();
         }
 
         private void OnCommand(string command, string args) {
@@ -46,6 +48,7 @@ namespace PeepingTom {
         protected virtual void Dispose(bool includeManaged) {
             this.hookManager.Dispose();
             this.Interface.Framework.OnUpdateEvent -= this.Watcher.OnFrameworkUpdate;
+            this.Watcher.WaitStopThread();
             this.Watcher.Dispose();
             this.Interface.UiBuilder.OnBuildUi -= DrawUI;
             this.Interface.UiBuilder.OnOpenConfigUi -= ConfigUI;

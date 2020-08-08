@@ -20,12 +20,19 @@ namespace PeepingTom {
         private long soundLastPlayed = 0;
         private int lastTargetAmount = 0;
 
+        private volatile bool stop = false;
+        private volatile bool needsUpdate = true;
+        private Thread thread;
+
+        private readonly object dataMutex = new object();
+        private TargetThreadData data;
+
         private readonly Mutex currentMutex = new Mutex();
-        private PlayerCharacter[] current = Array.Empty<PlayerCharacter>();
-        public IReadOnlyCollection<PlayerCharacter> CurrentTargeters {
+        private Targeter[] current = Array.Empty<Targeter>();
+        public IReadOnlyCollection<Targeter> CurrentTargeters {
             get {
                 this.currentMutex.WaitOne();
-                PlayerCharacter[] current = (PlayerCharacter[])this.current.Clone();
+                Targeter[] current = this.current.ToArray();
                 this.currentMutex.ReleaseMutex();
                 return current;
             }
@@ -52,21 +59,55 @@ namespace PeepingTom {
             this.previousMutex.ReleaseMutex();
         }
 
+        public void StartThread() {
+            this.thread = new Thread(new ThreadStart(() => {
+                while (!this.stop) {
+                    this.Update();
+                    this.needsUpdate = true;
+                    Thread.Sleep(this.plugin.Config.PollFrequency);
+                }
+            }));
+            this.thread.Start();
+        }
+
+        public void WaitStopThread() {
+            this.stop = true;
+            this.thread?.Join();
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "delegate")]
         public void OnFrameworkUpdate(Framework framework) {
-            PlayerCharacter player = this.plugin.Interface.ClientState.LocalPlayer;
-            if (player == null) {
+            if (!this.needsUpdate) {
                 return;
             }
 
-            // block until lease
-            this.currentMutex.WaitOne();
+            lock (this.dataMutex) {
+                this.data = new TargetThreadData(this.plugin.Interface);
+            }
+            this.needsUpdate = false;
+        }
 
-            // get targeters and set a copy so we can release the mutex faster
-            PlayerCharacter[] current = this.GetTargeting(player);
-            this.current = (PlayerCharacter[])current.Clone();
+        private void Update() {
+            lock (this.dataMutex) {
+                if (this.data == null) {
+                    return;
+                }
 
-            // release
-            this.currentMutex.ReleaseMutex();
+                PlayerCharacter player = this.data.localPlayer;
+                if (player == null) {
+                    return;
+                }
+
+                // block until lease
+                this.currentMutex.WaitOne();
+
+                // get targeters and set a copy so we can release the mutex faster
+                Targeter[] current = this.GetTargeting(this.data.actors, player);
+                this.current = (Targeter[])current.Clone();
+
+                // release
+                this.currentMutex.ReleaseMutex();
+            }
 
             this.HandleHistory(current);
 
@@ -78,19 +119,19 @@ namespace PeepingTom {
             this.lastTargetAmount = this.current.Length;
         }
 
-        private void HandleHistory(PlayerCharacter[] targeting) {
+        private void HandleHistory(Targeter[] targeting) {
             if (!this.plugin.Config.KeepHistory || (!this.plugin.Config.HistoryWhenClosed && !this.plugin.Ui.Visible)) {
                 return;
             }
 
             this.previousMutex.WaitOne();
 
-            foreach (PlayerCharacter targeter in targeting) {
+            foreach (Targeter targeter in targeting) {
                 // add the targeter to the previous list
                 if (this.previousTargeters.Any(old => old.ActorId == targeter.ActorId)) {
                     this.previousTargeters.RemoveAll(old => old.ActorId == targeter.ActorId);
                 }
-                this.previousTargeters.Insert(0, new Targeter(targeter));
+                this.previousTargeters.Insert(0, targeter);
             }
 
             // only keep the configured number of previous targeters (ignoring ones that are currently targeting)
@@ -101,14 +142,15 @@ namespace PeepingTom {
             this.previousMutex.ReleaseMutex();
         }
 
-        private PlayerCharacter[] GetTargeting(Actor player) {
-            return this.plugin.Interface.ClientState.Actors
+        private Targeter[] GetTargeting(Actor[] actors, Actor player) {
+            return actors
                 .Where(actor => actor.TargetActorID == player.ActorId && actor is PlayerCharacter)
                 .Select(actor => actor as PlayerCharacter)
                 .Where(actor => this.plugin.Config.LogParty || this.plugin.Interface.ClientState.PartyList.All(member => member.Actor?.ActorId != actor.ActorId))
                 .Where(actor => this.plugin.Config.LogAlliance || !this.InAlliance(actor))
                 .Where(actor => this.plugin.Config.LogInCombat || !this.InCombat(actor))
                 .Where(actor => this.plugin.Config.LogSelf || actor.ActorId != player.ActorId)
+                .Select(actor => new Targeter(actor))
                 .ToArray();
         }
 
@@ -178,6 +220,16 @@ namespace PeepingTom {
         public void Dispose() {
             this.currentMutex.Dispose();
             this.previousMutex.Dispose();
+        }
+    }
+
+    class TargetThreadData {
+        public PlayerCharacter localPlayer;
+        public Actor[] actors;
+
+        public TargetThreadData(DalamudPluginInterface pi) {
+            this.localPlayer = pi.ClientState.LocalPlayer;
+            this.actors = pi.ClientState.Actors.ToArray();
         }
     }
 }

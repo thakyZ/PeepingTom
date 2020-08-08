@@ -45,6 +45,8 @@ namespace PeepingTom {
         public bool ShowInInstance { get; set; } = false;
         public bool ShowInCutscenes { get; set; } = false;
 
+        public int PollFrequency { get; set; } = 100;
+
         public void Initialize(DalamudPluginInterface pluginInterface) {
             this.pi = pluginInterface;
         }
