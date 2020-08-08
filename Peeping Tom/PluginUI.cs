@@ -359,10 +359,9 @@ namespace PeepingTom {
                     }
                     if (this.plugin.Config.KeepHistory) {
                         // get a list of the previous targeters that aren't currently targeting
-                        Targeter[] previous = previousTargeters
+                        var previous = previousTargeters
                             .Where(old => targeting.All(actor => actor.ActorId != old.ActorId))
-                            .Take(this.plugin.Config.NumHistory)
-                            .ToArray();
+                            .Take(this.plugin.Config.NumHistory);
                         // add previous targeters to the list
                         foreach (Targeter oldTargeter in previous) {
                             Actor actor = null;
