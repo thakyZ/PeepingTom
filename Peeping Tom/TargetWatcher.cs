@@ -20,7 +20,7 @@ namespace PeepingTom {
         private long soundLastPlayed = 0;
         private int lastTargetAmount = 0;
 
-        public readonly Mutex currentMutex = new Mutex();
+        private readonly Mutex currentMutex = new Mutex();
         private PlayerCharacter[] current = Array.Empty<PlayerCharacter>();
         public IReadOnlyCollection<PlayerCharacter> CurrentTargeters {
             get {
@@ -31,7 +31,7 @@ namespace PeepingTom {
             }
         }
 
-        public readonly Mutex previousMutex = new Mutex();
+        private readonly Mutex previousMutex = new Mutex();
         private readonly List<Targeter> previousTargeters = new List<Targeter>();
         public IReadOnlyCollection<Targeter> PreviousTargeters {
             get {
