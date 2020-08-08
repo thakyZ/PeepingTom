@@ -84,6 +84,8 @@ namespace PeepingTom {
                 return;
             }
 
+            this.previousMutex.WaitOne();
+
             foreach (PlayerCharacter targeter in targeting) {
                 // add the targeter to the previous list
                 if (this.previousTargeters.Any(old => old.ActorId == targeter.ActorId)) {
@@ -96,6 +98,8 @@ namespace PeepingTom {
             while (this.previousTargeters.Where(old => targeting.All(actor => actor.ActorId != old.ActorId)).Count() > this.plugin.Config.NumHistory) {
                 this.previousTargeters.RemoveAt(this.previousTargeters.Count - 1);
             }
+
+            this.previousMutex.ReleaseMutex();
         }
 
         private PlayerCharacter[] GetTargeting(Actor player) {
