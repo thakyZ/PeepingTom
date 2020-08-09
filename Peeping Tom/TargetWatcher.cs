@@ -159,17 +159,11 @@ namespace PeepingTom {
             return Marshal.ReadByte(statusPtr);
         }
 
-        private bool InCombat(Actor actor) {
-            return (GetStatus(actor) & 2) > 0;
-        }
+        private bool InCombat(Actor actor) => (this.GetStatus(actor) & 2) > 0;
 
-        private bool InParty(Actor actor) {
-            return (GetStatus(actor) & 16) > 0;
-        }
+        private bool InParty(Actor actor) => (this.GetStatus(actor) & 16) > 0;
 
-        private bool InAlliance(Actor actor) {
-            return (GetStatus(actor) & 32) > 0;
-        }
+        private bool InAlliance(Actor actor) => (this.GetStatus(actor) & 32) > 0;
 
         private bool CanPlaySound() {
             if (!this.plugin.Config.PlaySoundOnTarget) {
