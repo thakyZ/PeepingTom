@@ -39,9 +39,9 @@ namespace PeepingTom {
 
         private void OnCommand(string command, string args) {
             if (args == "config" || args == "c") {
-                this.Ui.SettingsVisible = true;
+                this.Ui.SettingsOpen = true;
             } else {
-                this.Ui.Visible = true;
+                this.Ui.WantsOpen = true;
             }
         }
 
@@ -68,7 +68,7 @@ namespace PeepingTom {
         }
 
         private void ConfigUI(object sender, EventArgs args) {
-            this.Ui.SettingsVisible = true;
+            this.Ui.SettingsOpen = true;
         }
     }
 }

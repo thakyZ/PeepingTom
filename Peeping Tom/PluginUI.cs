@@ -16,16 +16,18 @@ namespace PeepingTom {
 
         private Optional<Actor> previousFocus = new Optional<Actor>();
 
-        private bool visible = false;
-        public bool Visible {
-            get { return this.visible; }
-            set { this.visible = value; }
+        private bool _wantsOpen = false;
+        public bool WantsOpen {
+            get => this._wantsOpen;
+            set => this._wantsOpen = value;
         }
 
-        private bool settingsVisible = false;
-        public bool SettingsVisible {
-            get { return this.settingsVisible; }
-            set { this.settingsVisible = value; }
+        public bool Visible { get; private set; }
+
+        private bool _settingsOpen = false;
+        public bool SettingsOpen {
+            get => this._settingsOpen;
+            set => this._settingsOpen = value;
         }
 
         public PluginUI(PeepingTomPlugin plugin) {
@@ -33,12 +35,12 @@ namespace PeepingTom {
         }
 
         public void Dispose() {
-            this.Visible = false;
-            this.SettingsVisible = false;
+            this.WantsOpen = false;
+            this.SettingsOpen = false;
         }
 
         public void Draw() {
-            if (this.SettingsVisible) {
+            if (this.SettingsOpen) {
                 ShowSettings();
             }
 
@@ -51,7 +53,7 @@ namespace PeepingTom {
                 || this.plugin.Interface.ClientState.Condition[ConditionFlag.OccupiedInCutSceneEvent];
 
             // FIXME: this could just be a boolean expression
-            bool shouldBeShown = this.Visible;
+            bool shouldBeShown = this.WantsOpen;
             if (inCombat && !this.plugin.Config.ShowInCombat) {
                 shouldBeShown = false;
             } else if (inInstance && !this.plugin.Config.ShowInInstance) {
@@ -59,6 +61,8 @@ namespace PeepingTom {
             } else if (inCutscene && !this.plugin.Config.ShowInCutscenes) {
                 shouldBeShown = false;
             }
+
+            this.Visible = shouldBeShown;
 
             if (shouldBeShown) {
                 ShowMainWindow();
@@ -86,7 +90,7 @@ namespace PeepingTom {
         private void ShowSettings() {
             // 700x250 if setting a size
             ImGui.SetNextWindowSize(new Vector2(700, 250));
-            if (ImGui.Begin($"{this.plugin.Name} settings", ref this.settingsVisible)) {
+            if (ImGui.Begin($"{this.plugin.Name} settings", ref this._settingsOpen)) {
                 if (ImGui.BeginTabBar("##settings-tabs")) {
                     if (ImGui.BeginTabItem("Markers")) {
                         bool markTargeted = this.plugin.Config.MarkTargeted;
@@ -352,7 +356,7 @@ namespace PeepingTom {
             if (!this.plugin.Config.AllowMovement) {
                 flags |= ImGuiWindowFlags.NoMove;
             }
-            if (ImGui.Begin(this.plugin.Name, ref this.visible, flags)) {
+            if (ImGui.Begin(this.plugin.Name, ref this._wantsOpen, flags)) {
                 ImGui.Text("Targeting you");
                 bool anyHovered = false;
                 if (ImGui.ListBoxHeader("##targeting", targeting.Count, 5)) {

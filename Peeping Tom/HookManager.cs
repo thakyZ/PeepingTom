@@ -39,13 +39,13 @@ namespace PeepingTom {
                 return;
             }
 
-            this.plugin.Ui.Visible = true;
+            this.plugin.Ui.WantsOpen = true;
         }
 
         private void OnLogout(IntPtr ptr) {
             this.logoutHook.Original(ptr);
 
-            this.plugin.Ui.Visible = false;
+            this.plugin.Ui.WantsOpen = false;
             this.plugin.Watcher.ClearPrevious();
         }
 
