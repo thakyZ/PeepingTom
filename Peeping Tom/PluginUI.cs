@@ -330,10 +330,15 @@ namespace PeepingTom {
             // create a dictionary for O(1) lookups by actor id
             Dictionary<int, Actor> actors = null;
             if (targeting.Count + (previousTargeters?.Count ?? 0) > 1) {
-                actors = this.plugin.Interface.ClientState.Actors
-                    // only take into account players
-                    .Where(actor => actor.ObjectKind == Dalamud.Game.ClientState.Actors.ObjectKind.Player)
-                    .ToDictionary(actor => actor.ActorId);
+                Dictionary<int, Actor> dict = new Dictionary<int, Actor>();
+                foreach (Actor actor in this.plugin.Interface.ClientState.Actors) {
+                    if (dict.ContainsKey(actor.ActorId) || actor.ObjectKind != Dalamud.Game.ClientState.Actors.ObjectKind.Player) {
+                        continue;
+                    }
+
+                    dict.Add(actor.ActorId, actor);
+                }
+                actors = dict;
             }
             
             ImGuiWindowFlags flags = ImGuiWindowFlags.AlwaysAutoResize;
