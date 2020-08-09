@@ -312,6 +312,13 @@ namespace PeepingTom {
                             ImGui.Text($"Status: {status}");
                         }
 
+                        PlayerCharacter currentTarget = this.GetCurrentTarget();
+                        if (currentTarget != null) {
+                            IntPtr statusPtr = this.plugin.Interface.TargetModuleScanner.ResolveRelativeAddress(currentTarget.Address, 0x1901);
+                            byte status = Marshal.ReadByte(statusPtr);
+                            ImGui.Text($"Target status: {status}");
+                        }
+
                         ImGui.EndTabItem();
                     }
 
