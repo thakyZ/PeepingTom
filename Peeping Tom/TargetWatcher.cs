@@ -146,7 +146,7 @@ namespace PeepingTom {
             return actors
                 .Where(actor => actor.TargetActorID == player.ActorId && actor is PlayerCharacter)
                 .Select(actor => actor as PlayerCharacter)
-                .Where(actor => this.plugin.Config.LogParty || this.plugin.Interface.ClientState.PartyList.All(member => member.Actor?.ActorId != actor.ActorId))
+                .Where(actor => this.plugin.Config.LogParty || !this.InParty(actor))
                 .Where(actor => this.plugin.Config.LogAlliance || !this.InAlliance(actor))
                 .Where(actor => this.plugin.Config.LogInCombat || !this.InCombat(actor))
                 .Where(actor => this.plugin.Config.LogSelf || actor.ActorId != player.ActorId)
@@ -161,6 +161,10 @@ namespace PeepingTom {
 
         private bool InCombat(Actor actor) {
             return (GetStatus(actor) & 2) > 0;
+        }
+
+        private bool InParty(Actor actor) {
+            return (GetStatus(actor) & 16) > 0;
         }
 
         private bool InAlliance(Actor actor) {
