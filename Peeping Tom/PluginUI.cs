@@ -311,14 +311,14 @@ namespace PeepingTom {
 
                         if (this.plugin.Interface.ClientState.LocalPlayer != null) {
                             PlayerCharacter player = this.plugin.Interface.ClientState.LocalPlayer;
-                            IntPtr statusPtr = this.plugin.Interface.TargetModuleScanner.ResolveRelativeAddress(player.Address, 0x1901);
+                            IntPtr statusPtr = this.plugin.Interface.TargetModuleScanner.ResolveRelativeAddress(player.Address, 0x1906);
                             byte status = Marshal.ReadByte(statusPtr);
                             ImGui.Text($"Status: {status}");
                         }
 
                         PlayerCharacter currentTarget = this.GetCurrentTarget();
                         if (currentTarget != null) {
-                            IntPtr statusPtr = this.plugin.Interface.TargetModuleScanner.ResolveRelativeAddress(currentTarget.Address, 0x1901);
+                            IntPtr statusPtr = this.plugin.Interface.TargetModuleScanner.ResolveRelativeAddress(currentTarget.Address, 0x1906);
                             byte status = Marshal.ReadByte(statusPtr);
                             ImGui.Text($"Target status: {status}");
                         }

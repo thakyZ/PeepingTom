@@ -146,24 +146,24 @@ namespace PeepingTom {
             return actors
                 .Where(actor => actor.TargetActorID == player.ActorId && actor is PlayerCharacter)
                 .Select(actor => actor as PlayerCharacter)
-                .Where(actor => this.plugin.Config.LogParty || !this.InParty(actor))
-                .Where(actor => this.plugin.Config.LogAlliance || !this.InAlliance(actor))
-                .Where(actor => this.plugin.Config.LogInCombat || !this.InCombat(actor))
+                .Where(actor => this.plugin.Config.LogParty || !InParty(actor))
+                .Where(actor => this.plugin.Config.LogAlliance || !InAlliance(actor))
+                .Where(actor => this.plugin.Config.LogInCombat || !InCombat(actor))
                 .Where(actor => this.plugin.Config.LogSelf || actor.ActorId != player.ActorId)
                 .Select(actor => new Targeter(actor))
                 .ToArray();
         }
 
-        private byte GetStatus(Actor actor) {
-            IntPtr statusPtr = this.plugin.Interface.TargetModuleScanner.ResolveRelativeAddress(actor.Address, 0x1901);
+        private static byte GetStatus(Actor actor) {
+            IntPtr statusPtr = actor.Address + 0x1906; // updated 5.3
             return Marshal.ReadByte(statusPtr);
         }
 
-        private bool InCombat(Actor actor) => (this.GetStatus(actor) & 2) > 0;
+        private static bool InCombat(Actor actor) => (GetStatus(actor) & 2) > 0;
 
-        private bool InParty(Actor actor) => (this.GetStatus(actor) & 16) > 0;
+        private static bool InParty(Actor actor) => (GetStatus(actor) & 16) > 0;
 
-        private bool InAlliance(Actor actor) => (this.GetStatus(actor) & 32) > 0;
+        private static bool InAlliance(Actor actor) => (GetStatus(actor) & 32) > 0;
 
         private bool CanPlaySound() {
             if (!this.plugin.Config.PlaySoundOnTarget) {
