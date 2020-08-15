@@ -10,7 +10,6 @@ namespace PeepingTom {
         internal Configuration Config { get; private set; }
         internal PluginUI Ui { get; private set; }
         internal TargetWatcher Watcher { get; private set; }
-        private HookManager hookManager;
 
         public void Initialize(DalamudPluginInterface pluginInterface) {
             this.Interface = pluginInterface ?? throw new ArgumentNullException(nameof(pluginInterface), "DalamudPluginInterface argument was null");
@@ -18,7 +17,6 @@ namespace PeepingTom {
             this.Config.Initialize(this.Interface);
             this.Watcher = new TargetWatcher(this);
             this.Ui = new PluginUI(this);
-            this.hookManager = new HookManager(this);
 
             this.Interface.CommandManager.AddHandler("/ppeepingtom", new CommandInfo(this.OnCommand) {
                 HelpMessage = "Use with no arguments to show the list. Use with \"c\" or \"config\" to show the config"
@@ -31,6 +29,8 @@ namespace PeepingTom {
             });
 
             this.Interface.Framework.OnUpdateEvent += this.Watcher.OnFrameworkUpdate;
+            this.Interface.ClientState.OnLogin += this.OnLogin;
+            this.Interface.ClientState.OnLogout += this.OnLogout;
             this.Interface.UiBuilder.OnBuildUi += this.DrawUI;
             this.Interface.UiBuilder.OnOpenConfigUi += this.ConfigUI;
 
@@ -45,9 +45,23 @@ namespace PeepingTom {
             }
         }
 
+        private void OnLogin(object sender, EventArgs args) {
+            if (!this.Config.OpenOnLogin) {
+                return;
+            }
+
+            this.Ui.WantsOpen = true;
+        }
+
+        private void OnLogout(object sender, EventArgs args) {
+            this.Ui.WantsOpen = false;
+            this.Watcher.ClearPrevious();
+        }
+
         protected virtual void Dispose(bool includeManaged) {
-            this.hookManager.Dispose();
             this.Interface.Framework.OnUpdateEvent -= this.Watcher.OnFrameworkUpdate;
+            this.Interface.ClientState.OnLogin -= this.OnLogin;
+            this.Interface.ClientState.OnLogout -= this.OnLogout;
             this.Watcher.WaitStopThread();
             this.Watcher.Dispose();
             this.Interface.UiBuilder.OnBuildUi -= DrawUI;
