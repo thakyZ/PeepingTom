@@ -41,6 +41,7 @@ namespace PeepingTom {
 
         public bool OpenOnLogin { get; set; } = false;
         public bool AllowMovement { get; set; } = true;
+        public bool AllowResize { get; set; } = true;
         public bool ShowInCombat { get; set; } = false;
         public bool ShowInInstance { get; set; } = false;
         public bool ShowInCutscenes { get; set; } = false;

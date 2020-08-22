@@ -215,6 +215,12 @@ namespace PeepingTom {
                             this.plugin.Config.Save();
                         }
 
+                        bool allowResizing = this.plugin.Config.AllowResize;
+                        if (ImGui.Checkbox("Allow resizing the main window", ref allowResizing)) {
+                            this.plugin.Config.AllowResize = allowResizing;
+                            this.plugin.Config.Save();
+                        }
+
                         ImGui.Spacing();
 
                         bool showInCombat = this.plugin.Config.ShowInCombat;
@@ -352,14 +358,22 @@ namespace PeepingTom {
                 actors = dict;
             }
             
-            ImGuiWindowFlags flags = ImGuiWindowFlags.AlwaysAutoResize;
+            ImGuiWindowFlags flags = ImGuiWindowFlags.None;
             if (!this.plugin.Config.AllowMovement) {
                 flags |= ImGuiWindowFlags.NoMove;
             }
+            if (!this.plugin.Config.AllowResize) {
+                flags |= ImGuiWindowFlags.NoResize;
+            }
+            ImGui.SetNextWindowSize(new Vector2(290, 195), ImGuiCond.FirstUseEver);
             if (ImGui.Begin(this.plugin.Name, ref this._wantsOpen, flags)) {
                 ImGui.Text("Targeting you");
+
+                float height = ImGui.GetContentRegionAvail().Y;
+
+                height -= ImGui.CalcTextSize(string.Empty).Y + ImGui.GetStyle().ItemSpacing.Y;
                 bool anyHovered = false;
-                if (ImGui.ListBoxHeader("##targeting", targeting.Count, 5)) {
+                if (ImGui.ListBoxHeader("##targeting", new Vector2(-1, height))) {
                     // add the two first players for testing
                     //foreach (PlayerCharacter p in this.plugin.Interface.ClientState.Actors
                     //    .Where(actor => actor is PlayerCharacter)
