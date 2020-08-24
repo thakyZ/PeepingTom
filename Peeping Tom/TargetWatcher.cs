@@ -4,6 +4,7 @@ using Dalamud.Game.Chat.SeStringHandling.Payloads;
 using Dalamud.Game.ClientState.Actors.Types;
 using Dalamud.Game.Internal;
 using Dalamud.Plugin;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,6 +13,7 @@ using System.Linq;
 using System.Media;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace PeepingTom {
     class TargetWatcher : IDisposable {
@@ -188,28 +190,45 @@ namespace PeepingTom {
         }
 
         private void PlaySound() {
-            SoundPlayer player;
-            if (this.plugin.Config.SoundPath == null) {
-                player = new SoundPlayer(Properties.Resources.Target);
-            } else {
-                player = new SoundPlayer(this.plugin.Config.SoundPath);
+            int soundDevice = this.plugin.Config.SoundDevice;
+            if (soundDevice < -1 || soundDevice > WaveOut.DeviceCount) {
+                soundDevice = -1;
             }
-            using (player) {
+
+            new Thread(new ThreadStart(() => {
+                WaveStream reader;
                 try {
-                    player.Play();
-                } catch (FileNotFoundException e) {
-                    this.SendError($"Could not play sound: {e.Message}");
-                } catch (InvalidOperationException e) {
-                    this.SendError($"Could not play sound: {e.Message}");
+                    if (this.plugin.Config.SoundPath == null) {
+                        reader = new WaveFileReader(Properties.Resources.Target);
+                    } else {
+                        reader = new AudioFileReader(this.plugin.Config.SoundPath);
+                    }
+#pragma warning disable CA1031 // Do not catch general exception types
+                } catch (Exception e) {
+#pragma warning restore CA1031 // Do not catch general exception types
+                    this.SendError($"Could not play sound file: {e.Message}");
+                    return;
                 }
-            }
+
+                using (reader) {
+                    using (var output = new WaveOutEvent() { DeviceNumber = soundDevice }) {
+                        output.Init(reader);
+                        output.Volume = this.plugin.Config.SoundVolume;
+                        output.Play();
+
+                        while (output.PlaybackState == PlaybackState.Playing) {
+                            Thread.Sleep(500);
+                        }
+                    }
+                }
+            })).Start();
         }
 
         private void SendError(string message) {
-            Payload[] payloads = { new TextPayload($"[Who's Looking] {message}") };
+            Payload[] payloads = { new TextPayload($"[{this.plugin.Name}] {message}") };
             this.plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
                 MessageBytes = new SeString(payloads).Encode(),
-                Type = XivChatType.ErrorMessage
+                Type = XivChatType.ErrorMessage,
             });
         }
 

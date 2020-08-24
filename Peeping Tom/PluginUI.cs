@@ -4,6 +4,7 @@ using Dalamud.Game.Chat.SeStringHandling.Payloads;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Actors.Types;
 using ImGuiNET;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -89,8 +90,8 @@ namespace PeepingTom {
 
         private void ShowSettings() {
             // 700x250 if setting a size
-            ImGui.SetNextWindowSize(new Vector2(700, 250));
-            if (ImGui.Begin($"{this.plugin.Name} settings", ref this._settingsOpen)) {
+            ImGui.SetNextWindowSize(new Vector2(700, 275));
+            if (ImGui.Begin($"{this.plugin.Name} settings", ref this._settingsOpen, ImGuiWindowFlags.NoResize)) {
                 if (ImGui.BeginTabBar("##settings-tabs")) {
                     if (ImGui.BeginTabItem("Markers")) {
                         bool markTargeted = this.plugin.Config.MarkTargeted;
@@ -178,13 +179,48 @@ namespace PeepingTom {
                         }
 
                         string path = this.plugin.Config.SoundPath ?? "";
-                        if (ImGui.InputText("Path to WAV file", ref path, 1_000)) {
+                        if (ImGui.InputText("Path to audio file", ref path, 1_000)) {
                             path = path.Trim();
                             this.plugin.Config.SoundPath = path.Length == 0 ? null : path;
                             this.plugin.Config.Save();
                         }
 
                         ImGui.Text("Leave this blank to use a built-in sound.");
+
+                        float volume = this.plugin.Config.SoundVolume * 100f;
+                        if (ImGui.DragFloat("Volume of sound", ref volume, .1f, 0f, 100f, "%.1f%%")) {
+                            this.plugin.Config.SoundVolume = Math.Max(0f, Math.Min(1f, volume / 100f));
+                            this.plugin.Config.Save();
+                        }
+
+                        int soundDevice = this.plugin.Config.SoundDevice;
+                        string name;
+                        if (soundDevice == -1) {
+                            name = "Default";
+                        } else if (soundDevice > -1 && soundDevice < WaveOut.DeviceCount) {
+                            var caps = WaveOut.GetCapabilities(soundDevice);
+                            name = caps.ProductName;
+                        } else {
+                            name = "Invalid device";
+                        }
+                        if (ImGui.BeginCombo("Output device", name)) {
+                            if (ImGui.Selectable("Default")) {
+                                this.plugin.Config.SoundDevice = -1;
+                                this.plugin.Config.Save();
+                            }
+
+                            ImGui.Separator();
+
+                            for (int deviceNum = -1; deviceNum < WaveOut.DeviceCount; deviceNum++) {
+                                var caps = WaveOut.GetCapabilities(deviceNum);
+                                if (ImGui.Selectable(caps.ProductName)) {
+                                    this.plugin.Config.SoundDevice = deviceNum;
+                                    this.plugin.Config.Save();
+                                }
+                            }
+
+                            ImGui.EndCombo();
+                        }
 
                         float soundCooldown = this.plugin.Config.SoundCooldown;
                         if (ImGui.DragFloat("Cooldown for sound (seconds)", ref soundCooldown, .01f, 0f, 30f)) {
@@ -357,7 +393,7 @@ namespace PeepingTom {
                 }
                 actors = dict;
             }
-            
+
             ImGuiWindowFlags flags = ImGuiWindowFlags.None;
             if (!this.plugin.Config.AllowMovement) {
                 flags |= ImGuiWindowFlags.NoMove;
