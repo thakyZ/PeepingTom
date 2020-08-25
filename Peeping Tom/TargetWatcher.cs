@@ -210,10 +210,13 @@ namespace PeepingTom {
                     return;
                 }
 
+                WaveChannel32 channel = new WaveChannel32(reader) {
+                    Volume = this.plugin.Config.SoundVolume,
+                };
+
                 using (reader) {
                     using (var output = new WaveOutEvent() { DeviceNumber = soundDevice }) {
-                        output.Init(reader);
-                        output.Volume = this.plugin.Config.SoundVolume;
+                        output.Init(channel);
                         output.Play();
 
                         while (output.PlaybackState == PlaybackState.Playing) {
