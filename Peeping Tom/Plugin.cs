@@ -10,12 +10,14 @@ namespace PeepingTom {
         internal Configuration Config { get; private set; }
         internal PluginUI Ui { get; private set; }
         internal TargetWatcher Watcher { get; private set; }
+        internal GameFunctions GameFunctions { get; private set; }
 
         public void Initialize(DalamudPluginInterface pluginInterface) {
             this.Interface = pluginInterface ?? throw new ArgumentNullException(nameof(pluginInterface), "DalamudPluginInterface argument was null");
             this.Config = this.Interface.GetPluginConfig() as Configuration ?? new Configuration();
             this.Config.Initialize(this.Interface);
             this.Watcher = new TargetWatcher(this);
+            this.GameFunctions = new GameFunctions(this);
             this.Ui = new PluginUI(this);
 
             this.Interface.CommandManager.AddHandler("/ppeepingtom", new CommandInfo(this.OnCommand) {

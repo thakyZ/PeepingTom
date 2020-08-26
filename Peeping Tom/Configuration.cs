@@ -34,6 +34,8 @@ namespace PeepingTom {
         public bool LogSelf { get; set; } = false;
 
         public bool FocusTargetOnHover { get; set; } = true;
+        public bool OpenExamine { get; set; } = false;
+
         public bool PlaySoundOnTarget { get; set; } = false;
         public string SoundPath { get; set; } = null;
         public float SoundVolume { get; set; } = 1f;

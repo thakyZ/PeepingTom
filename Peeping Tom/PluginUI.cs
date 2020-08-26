@@ -3,6 +3,7 @@ using Dalamud.Game.Chat.SeStringHandling;
 using Dalamud.Game.Chat.SeStringHandling.Payloads;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Actors.Types;
+using Dalamud.Plugin;
 using ImGuiNET;
 using NAudio.Wave;
 using System;
@@ -89,8 +90,7 @@ namespace PeepingTom {
         }
 
         private void ShowSettings() {
-            // 700x250 if setting a size
-            ImGui.SetNextWindowSize(new Vector2(700, 275));
+            ImGui.SetNextWindowSize(new Vector2(700, 250));
             if (ImGui.Begin($"{this.plugin.Name} settings", ref this._settingsOpen, ImGuiWindowFlags.NoResize)) {
                 if (ImGui.BeginTabBar("##settings-tabs")) {
                     if (ImGui.BeginTabItem("Markers")) {
@@ -172,6 +172,16 @@ namespace PeepingTom {
                             this.plugin.Config.Save();
                         }
 
+                        bool openExamine = this.plugin.Config.OpenExamine;
+                        if (ImGui.Checkbox("Open examine window on Alt-click", ref openExamine)) {
+                            this.plugin.Config.OpenExamine = openExamine;
+                            this.plugin.Config.Save();
+                        }
+
+                        ImGui.EndTabItem();
+                    }
+
+                    if (ImGui.BeginTabItem("Sound")) {
                         bool playSound = this.plugin.Config.PlaySoundOnTarget;
                         if (ImGui.Checkbox("Play sound when targeted", ref playSound)) {
                             this.plugin.Config.PlaySoundOnTarget = playSound;
@@ -211,7 +221,7 @@ namespace PeepingTom {
 
                             ImGui.Separator();
 
-                            for (int deviceNum = -1; deviceNum < WaveOut.DeviceCount; deviceNum++) {
+                            for (int deviceNum = 0; deviceNum < WaveOut.DeviceCount; deviceNum++) {
                                 var caps = WaveOut.GetCapabilities(deviceNum);
                                 if (ImGui.Selectable(caps.ProductName)) {
                                     this.plugin.Config.SoundDevice = deviceNum;
@@ -404,10 +414,16 @@ namespace PeepingTom {
             ImGui.SetNextWindowSize(new Vector2(290, 195), ImGuiCond.FirstUseEver);
             if (ImGui.Begin(this.plugin.Name, ref this._wantsOpen, flags)) {
                 ImGui.Text("Targeting you");
+                ImGui.SameLine();
+                if (this.plugin.Config.OpenExamine) {
+                    HelpMarker("Click to link, Alt-click to examine, or right click to target.");
+                } else {
+                    HelpMarker("Click to link or right click to target.");
+                }
 
                 float height = ImGui.GetContentRegionAvail().Y;
+                height -= ImGui.GetStyle().ItemSpacing.Y;
 
-                height -= ImGui.CalcTextSize(string.Empty).Y + ImGui.GetStyle().ItemSpacing.Y;
                 bool anyHovered = false;
                 if (ImGui.ListBoxHeader("##targeting", new Vector2(-1, height))) {
                     // add the two first players for testing
@@ -447,8 +463,18 @@ namespace PeepingTom {
                     }
                     this.previousFocus = new Optional<Actor>();
                 }
-                ImGui.Text("Click to link or right click to target.");
                 ImGui.End();
+            }
+        }
+
+        private static void HelpMarker(string text) {
+            ImGui.TextDisabled("(?)");
+            if (ImGui.IsItemHovered()) {
+                ImGui.BeginTooltip();
+                ImGui.PushTextWrapPos(ImGui.GetFontSize() * 20f);
+                ImGui.TextUnformatted(text);
+                ImGui.PopTextWrapPos();
+                ImGui.EndTooltip();
             }
         }
 
@@ -477,11 +503,26 @@ namespace PeepingTom {
             }
 
             if (left) {
-                PlayerPayload payload = new PlayerPayload(this.plugin.Interface.Data, targeter.Name, targeter.HomeWorld.Id);
-                Payload[] payloads = { payload };
-                this.plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
-                    MessageBytes = new SeString(payloads).Encode()
-                });
+                if (this.plugin.Config.OpenExamine && ImGui.GetIO().KeyAlt) {
+                    if (actor != null) {
+                        this.plugin.GameFunctions.OpenExamineWindow(actor);
+                    } else {
+                        Payload[] payloads = {
+                            new TextPayload($"[{this.plugin.Name}] "),
+                            new PlayerPayload(this.plugin.Interface.Data, targeter.Name, targeter.HomeWorld.Id),
+                            new TextPayload(" is not close enough to examine."),
+                        };
+                        this.plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
+                            MessageBytes = new SeString(payloads).Encode(),
+                        });
+                    }
+                } else {
+                    PlayerPayload payload = new PlayerPayload(this.plugin.Interface.Data, targeter.Name, targeter.HomeWorld.Id);
+                    Payload[] payloads = { payload };
+                    this.plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
+                        MessageBytes = new SeString(payloads).Encode(),
+                    });
+                }
             } else if (right && actor != null) {
                 this.plugin.Interface.ClientState.Targets.SetCurrentTarget(actor);
             }

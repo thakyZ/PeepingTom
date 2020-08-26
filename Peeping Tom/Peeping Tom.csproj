@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration.cs" />
+    <Compile Include="GameFunctions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="PluginUI.cs" />
