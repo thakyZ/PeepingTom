@@ -3,7 +3,6 @@ using Dalamud.Game.Chat.SeStringHandling;
 using Dalamud.Game.Chat.SeStringHandling.Payloads;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Actors.Types;
-using Dalamud.Plugin;
 using ImGuiNET;
 using NAudio.Wave;
 using System;
@@ -305,7 +304,7 @@ namespace PeepingTom {
 
                         int numHistory = this.plugin.Config.NumHistory;
                         if (ImGui.InputInt("Number of previous targeters to keep", ref numHistory)) {
-                            numHistory = Math.Max(0, Math.Min(10, numHistory));
+                            numHistory = Math.Max(0, Math.Min(50, numHistory));
                             this.plugin.Config.NumHistory = numHistory;
                             this.plugin.Config.Save();
                         }
