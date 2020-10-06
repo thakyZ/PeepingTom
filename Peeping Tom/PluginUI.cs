@@ -69,20 +69,33 @@ namespace PeepingTom {
                 ShowMainWindow();
             }
 
-            if (this.plugin.Config.MarkTargeted) {
-                MarkPlayer(GetCurrentTarget(), this.plugin.Config.TargetedColour, this.plugin.Config.TargetedSize);
-            }
+            var flags = ImGuiWindowFlags.NoBackground
+                | ImGuiWindowFlags.NoTitleBar
+                | ImGuiWindowFlags.NoNav
+                | ImGuiWindowFlags.NoNavInputs
+                | ImGuiWindowFlags.NoFocusOnAppearing
+                | ImGuiWindowFlags.NoNavFocus
+                | ImGuiWindowFlags.NoInputs
+                | ImGuiWindowFlags.NoMouseInputs
+                | ImGuiWindowFlags.NoSavedSettings
+                | ImGuiWindowFlags.NoDecoration
+                | ImGuiWindowFlags.NoScrollWithMouse;
+            if (ImGui.Begin("Peeping Tom targeting indicator dummy window", flags)) {
+                if (this.plugin.Config.MarkTargeted) {
+                    MarkPlayer(GetCurrentTarget(), this.plugin.Config.TargetedColour, this.plugin.Config.TargetedSize);
+                }
 
-            if (this.plugin.Config.MarkTargeting) {
-                PlayerCharacter player = this.plugin.Interface.ClientState.LocalPlayer;
-                if (player != null) {
-                    PlayerCharacter[] targeting = this.plugin.Watcher.CurrentTargeters
-                        .Select(targeter => this.plugin.Interface.ClientState.Actors.FirstOrDefault(actor => actor.ActorId == targeter.ActorId))
-                        .Where(targeter => targeter != null)
-                        .Select(targeter => targeter as PlayerCharacter)
-                        .ToArray();
-                    foreach (PlayerCharacter targeter in targeting) {
-                        MarkPlayer(targeter, this.plugin.Config.TargetingColour, this.plugin.Config.TargetingSize);
+                if (this.plugin.Config.MarkTargeting) {
+                    PlayerCharacter player = this.plugin.Interface.ClientState.LocalPlayer;
+                    if (player != null) {
+                        PlayerCharacter[] targeting = this.plugin.Watcher.CurrentTargeters
+                            .Select(targeter => this.plugin.Interface.ClientState.Actors.FirstOrDefault(actor => actor.ActorId == targeter.ActorId))
+                            .Where(targeter => targeter != null)
+                            .Select(targeter => targeter as PlayerCharacter)
+                            .ToArray();
+                        foreach (PlayerCharacter targeter in targeting) {
+                            MarkPlayer(targeter, this.plugin.Config.TargetingColour, this.plugin.Config.TargetingSize);
+                        }
                     }
                 }
             }
@@ -323,14 +336,6 @@ namespace PeepingTom {
                     }
 
                     if (ImGui.BeginTabItem("Debug")) {
-                        bool debugMarkers = this.plugin.Config.DebugMarkers;
-                        if (ImGui.Checkbox("Debug markers", ref debugMarkers)) {
-                            this.plugin.Config.DebugMarkers = debugMarkers;
-                            this.plugin.Config.Save();
-                        }
-
-                        ImGui.Separator();
-
                         if (ImGui.Button("Log targeting you")) {
                             PlayerCharacter player = this.plugin.Interface.ClientState.LocalPlayer;
                             if (player != null) {
@@ -358,20 +363,6 @@ namespace PeepingTom {
                                     MessageBytes = new SeString(payloads).Encode()
                                 });
                             }
-                        }
-
-                        if (this.plugin.Interface.ClientState.LocalPlayer != null) {
-                            PlayerCharacter player = this.plugin.Interface.ClientState.LocalPlayer;
-                            IntPtr statusPtr = this.plugin.Interface.TargetModuleScanner.ResolveRelativeAddress(player.Address, 0x1906);
-                            byte status = Marshal.ReadByte(statusPtr);
-                            ImGui.Text($"Status: {status}");
-                        }
-
-                        PlayerCharacter currentTarget = this.GetCurrentTarget();
-                        if (currentTarget != null) {
-                            IntPtr statusPtr = this.plugin.Interface.TargetModuleScanner.ResolveRelativeAddress(currentTarget.Address, 0x1906);
-                            byte status = Marshal.ReadByte(statusPtr);
-                            ImGui.Text($"Target status: {status}");
                         }
 
                         ImGui.EndTabItem();
@@ -536,25 +527,16 @@ namespace PeepingTom {
                 return;
             }
 
-            ImGuiWindowFlags flags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoFocusOnAppearing;
-            if (this.plugin.Config.DebugMarkers) {
-                flags &= ~ImGuiWindowFlags.NoBackground;
-            }
+            ImGui.PushClipRect(new Vector2(0, 0), ImGui.GetIO().DisplaySize, false);
 
-            // smallest window size is 32x32
-            if (ImGui.Begin($"Targeting Marker: {player.Name}@{player.HomeWorld}", flags)) {
-                // determine the window size, giving it lots of space
-                float winSize = Math.Max(32, size * 10);
-                ImGui.SetWindowPos(new Vector2(screenPos.X - winSize / 2, screenPos.Y - winSize / 2));
-                ImGui.SetWindowSize(new Vector2(winSize, winSize));
-                ImGui.GetWindowDrawList().AddCircleFilled(
-                    new Vector2(screenPos.X, screenPos.Y),
-                    size,
-                    ImGui.GetColorU32(colour),
-                    100
-                );
-                ImGui.End();
-            }
+            ImGui.GetWindowDrawList().AddCircleFilled(
+                new Vector2(screenPos.X, screenPos.Y),
+                size,
+                ImGui.GetColorU32(colour),
+                100
+            );
+
+            ImGui.PopClipRect();
         }
 
         private PlayerCharacter GetCurrentTarget() {
