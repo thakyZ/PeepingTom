@@ -1,7 +1,7 @@
 ﻿using Dalamud.Game.ClientState.Actors.Types;
 using Dalamud.Plugin;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace PeepingTom {
@@ -16,7 +16,14 @@ namespace PeepingTom {
         public GameFunctions(PeepingTomPlugin plugin) {
             this.plugin = plugin ?? throw new ArgumentNullException(nameof(plugin), "PeepingTomPlugin cannot be null");
 
-            IntPtr rciPtr = this.plugin.Interface.TargetModuleScanner.ScanText("48 89 5C 24 ?? 57 48 83 EC 40 BA 1B 01 00 00");
+            IntPtr rciPtr;
+            try {
+                rciPtr = this.plugin.Interface.TargetModuleScanner.ScanText("48 89 5C 24 ?? 57 48 83 EC 40 BA 3B 01 00 00");
+                //                                                               old: 48 89 5C 24 ?? 57 48 83 EC 40 BA 1C 01 00 00
+                //                                                               old: 48 89 5C 24 ?? 57 48 83 EC 40 BA 1B 01 00 00
+            } catch (KeyNotFoundException) {
+                rciPtr = IntPtr.Zero;
+            }
             if (rciPtr == IntPtr.Zero) {
                 PluginLog.Log("Could not find the signature for the examine window function - will not be able to open examine window.");
                 return;

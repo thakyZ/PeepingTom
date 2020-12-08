@@ -184,11 +184,11 @@ namespace PeepingTom {
                             this.plugin.Config.Save();
                         }
 
-                        bool openExamine = this.plugin.Config.OpenExamine;
-                        if (ImGui.Checkbox("Open examine window on Alt-click", ref openExamine)) {
-                            this.plugin.Config.OpenExamine = openExamine;
-                            this.plugin.Config.Save();
-                        }
+                        // bool openExamine = this.plugin.Config.OpenExamine;
+                        // if (ImGui.Checkbox("Open examine window on Alt-click", ref openExamine)) {
+                        //     this.plugin.Config.OpenExamine = openExamine;
+                        //     this.plugin.Config.Save();
+                        // }
 
                         ImGui.EndTabItem();
                     }
@@ -405,11 +405,11 @@ namespace PeepingTom {
             if (ImGui.Begin(this.plugin.Name, ref this._wantsOpen, flags)) {
                 ImGui.Text("Targeting you");
                 ImGui.SameLine();
-                if (this.plugin.Config.OpenExamine) {
-                    HelpMarker("Click to link, Alt-click to examine, or right click to target.");
-                } else {
+                // if (this.plugin.Config.OpenExamine) {
+                //     HelpMarker("Click to link, Alt-click to examine, or right click to target.");
+                // } else {
                     HelpMarker("Click to link or right click to target.");
-                }
+                // }
 
                 float height = ImGui.GetContentRegionAvail().Y;
                 height -= ImGui.GetStyle().ItemSpacing.Y;
@@ -493,7 +493,7 @@ namespace PeepingTom {
             }
 
             if (left) {
-                if (this.plugin.Config.OpenExamine && ImGui.GetIO().KeyAlt) {
+                if (false && this.plugin.Config.OpenExamine && ImGui.GetIO().KeyAlt) {
                     if (actor != null) {
                         this.plugin.GameFunctions.OpenExamineWindow(actor);
                     } else {
