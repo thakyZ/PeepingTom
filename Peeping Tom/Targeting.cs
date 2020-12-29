@@ -19,7 +19,7 @@ namespace PeepingTom {
             this.ActorId = character.ActorId;
         }
 
-        public PlayerCharacter GetPlayerCharacter(DalamudPluginInterface pi) {
+        public PlayerCharacter? GetPlayerCharacter(DalamudPluginInterface pi) {
             if (pi == null) {
                 throw new ArgumentNullException(nameof(pi), "DalamudPluginInterface cannot be null");
             }

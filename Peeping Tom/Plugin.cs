@@ -3,14 +3,14 @@ using Dalamud.Plugin;
 using System;
 
 namespace PeepingTom {
-    public class PeepingTomPlugin : IDalamudPlugin, IDisposable {
+    public class PeepingTomPlugin : IDalamudPlugin {
         public string Name => "Peeping Tom";
 
-        internal DalamudPluginInterface Interface { get; private set; }
-        internal Configuration Config { get; private set; }
-        internal PluginUI Ui { get; private set; }
-        internal TargetWatcher Watcher { get; private set; }
-        internal GameFunctions GameFunctions { get; private set; }
+        internal DalamudPluginInterface Interface { get; private set; } = null!;
+        internal Configuration Config { get; private set; } = null!;
+        internal PluginUi Ui { get; private set; } = null!;
+        internal TargetWatcher Watcher { get; private set; } = null!;
+        internal GameFunctions GameFunctions { get; private set; } = null!;
 
         public void Initialize(DalamudPluginInterface pluginInterface) {
             this.Interface = pluginInterface ?? throw new ArgumentNullException(nameof(pluginInterface), "DalamudPluginInterface argument was null");
@@ -18,7 +18,7 @@ namespace PeepingTom {
             this.Config.Initialize(this.Interface);
             this.Watcher = new TargetWatcher(this);
             this.GameFunctions = new GameFunctions(this);
-            this.Ui = new PluginUI(this);
+            this.Ui = new PluginUi(this);
 
             this.Interface.CommandManager.AddHandler("/ppeepingtom", new CommandInfo(this.OnCommand) {
                 HelpMessage = "Use with no arguments to show the list. Use with \"c\" or \"config\" to show the config"
@@ -33,8 +33,8 @@ namespace PeepingTom {
             this.Interface.Framework.OnUpdateEvent += this.Watcher.OnFrameworkUpdate;
             this.Interface.ClientState.OnLogin += this.OnLogin;
             this.Interface.ClientState.OnLogout += this.OnLogout;
-            this.Interface.UiBuilder.OnBuildUi += this.DrawUI;
-            this.Interface.UiBuilder.OnOpenConfigUi += this.ConfigUI;
+            this.Interface.UiBuilder.OnBuildUi += this.DrawUi;
+            this.Interface.UiBuilder.OnOpenConfigUi += this.ConfigUi;
 
             this.Watcher.StartThread();
         }
@@ -66,8 +66,8 @@ namespace PeepingTom {
             this.Interface.ClientState.OnLogout -= this.OnLogout;
             this.Watcher.WaitStopThread();
             this.Watcher.Dispose();
-            this.Interface.UiBuilder.OnBuildUi -= DrawUI;
-            this.Interface.UiBuilder.OnOpenConfigUi -= ConfigUI;
+            this.Interface.UiBuilder.OnBuildUi -= this.DrawUi;
+            this.Interface.UiBuilder.OnOpenConfigUi -= this.ConfigUi;
             this.Interface.CommandManager.RemoveHandler("/ppeepingtom");
             this.Interface.CommandManager.RemoveHandler("/ptom");
             this.Interface.CommandManager.RemoveHandler("/ppeep");
@@ -79,11 +79,11 @@ namespace PeepingTom {
             GC.SuppressFinalize(this);
         }
 
-        private void DrawUI() {
+        private void DrawUi() {
             this.Ui.Draw();
         }
 
-        private void ConfigUI(object sender, EventArgs args) {
+        private void ConfigUi(object sender, EventArgs args) {
             this.Ui.SettingsOpen = true;
         }
     }
