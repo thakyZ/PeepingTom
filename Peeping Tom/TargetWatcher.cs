@@ -40,7 +40,7 @@ namespace PeepingTom {
         }
 
         private readonly Mutex _previousMutex = new Mutex();
-        private List<Targeter> Previous { get; set; } = new List<Targeter>();
+        private List<Targeter> Previous { get; } = new List<Targeter>();
 
         public IReadOnlyCollection<Targeter> PreviousTargeters {
             get {
