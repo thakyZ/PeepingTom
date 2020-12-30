@@ -201,19 +201,20 @@ namespace PeepingTom {
                     } else {
                         reader = new AudioFileReader(this.Plugin.Config.SoundPath);
                     }
-                    #pragma warning disable CA1031 // Do not catch general exception types
                 } catch (Exception e) {
-                    #pragma warning restore CA1031 // Do not catch general exception types
                     this.SendError($"Could not play sound file: {e.Message}");
                     return;
                 }
 
                 using WaveChannel32 channel = new WaveChannel32(reader) {
                     Volume = this.Plugin.Config.SoundVolume,
+                    PadWithZeroes = false,
                 };
 
                 using (reader) {
-                    using var output = new WaveOutEvent {DeviceNumber = soundDevice};
+                    using var output = new WaveOutEvent {
+                        DeviceNumber = soundDevice,
+                    };
                     output.Init(channel);
                     output.Play();
 
@@ -228,7 +229,10 @@ namespace PeepingTom {
             Payload[] payloads = {
                 new TextPayload($"[{this.Plugin.Name}] {message}"),
             };
-            this.Plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {MessageBytes = new SeString(payloads).Encode(), Type = XivChatType.ErrorMessage,});
+            this.Plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
+                MessageBytes = new SeString(payloads).Encode(),
+                Type = XivChatType.ErrorMessage,
+            });
         }
 
         public void Dispose() {
