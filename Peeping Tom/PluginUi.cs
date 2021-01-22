@@ -98,7 +98,7 @@ namespace PeepingTom {
 
             var targeting = this.Plugin.Watcher.CurrentTargeters
                 .Select(targeter => this.Plugin.Interface.ClientState.Actors.FirstOrDefault(actor => actor.ActorId == targeter.ActorId))
-                .Where(targeter => targeter != null)
+                .Where(targeter => targeter is PlayerCharacter)
                 .Cast<PlayerCharacter>()
                 .ToArray();
             foreach (var targeter in targeting) {
