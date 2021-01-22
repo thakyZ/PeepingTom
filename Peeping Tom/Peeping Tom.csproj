@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <RootNamespace>PeepingTom</RootNamespace>
-    <Version>1.5.5</Version>
+    <Version>1.5.6</Version>
     <LangVersion>8</LangVersion>
     <Nullable>enable</Nullable>
     <AssemblyName>PeepingTom</AssemblyName>
