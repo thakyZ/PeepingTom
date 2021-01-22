@@ -119,7 +119,7 @@ namespace PeepingTom {
         }
 
         private void HandleHistory(Targeter[] targeting) {
-            if (!this.Plugin.Config.KeepHistory || (!this.Plugin.Config.HistoryWhenClosed && !this.Plugin.Ui.Visible)) {
+            if (!this.Plugin.Config.KeepHistory || !this.Plugin.Config.HistoryWhenClosed && !this.Plugin.Ui.Visible) {
                 return;
             }
 
@@ -155,7 +155,7 @@ namespace PeepingTom {
         }
 
         private static byte GetStatus(Actor actor) {
-            var statusPtr = actor.Address + 0x1906; // updated 5.3
+            var statusPtr = actor.Address + 0x1980; // updated 5.4
             return Marshal.ReadByte(statusPtr);
         }
 
