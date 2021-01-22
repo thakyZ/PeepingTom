@@ -88,12 +88,12 @@ namespace PeepingTom {
             }
 
             if (!this.Plugin.Config.MarkTargeting) {
-                return;
+                goto EndDummy;
             }
 
             var player = this.Plugin.Interface.ClientState.LocalPlayer;
             if (player == null) {
-                return;
+                goto EndDummy;
             }
 
             var targeting = this.Plugin.Watcher.CurrentTargeters
@@ -104,6 +104,9 @@ namespace PeepingTom {
             foreach (var targeter in targeting) {
                 this.MarkPlayer(targeter, this.Plugin.Config.TargetingColour, this.Plugin.Config.TargetingSize);
             }
+
+            EndDummy:
+            ImGui.End();
         }
 
         private void ShowSettings() {
