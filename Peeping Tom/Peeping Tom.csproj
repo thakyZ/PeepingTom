@@ -3,8 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <RootNamespace>PeepingTom</RootNamespace>
-    <AssemblyVersion>1.5.4</AssemblyVersion>
-    <FileVersion>1.5.4</FileVersion>
+    <Version>1.5.5</Version>
     <LangVersion>8</LangVersion>
     <Nullable>enable</Nullable>
     <AssemblyName>PeepingTom</AssemblyName>
@@ -13,7 +12,7 @@
     <EmbeddedResource Include="Resources\target.wav" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Dalamud, Version=5.2.1.1, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="Dalamud, Version=5.2.2.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>$(AppData)\XIVLauncher\addon\Hooks\Dalamud.dll</HintPath>
       <Private>False</Private>
     </Reference>
