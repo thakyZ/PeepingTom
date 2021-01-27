@@ -35,6 +35,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="ILMerge.Fody" Version="1.16.0">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Resourcer.Fody" Version="1.8.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
