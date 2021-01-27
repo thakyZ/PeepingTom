@@ -40,6 +40,10 @@ namespace PeepingTom {
         }
 
         public void Draw() {
+            if (this.Plugin.InPvp) {
+                return;
+            }
+
             if (this.SettingsOpen) {
                 this.ShowSettings();
             }

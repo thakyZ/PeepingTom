@@ -78,7 +78,7 @@ namespace PeepingTom {
         }
 
         public void OnFrameworkUpdate(Framework framework) {
-            if (!this._needsUpdate) {
+            if (!this._needsUpdate || this.Plugin.InPvp) {
                 return;
             }
 

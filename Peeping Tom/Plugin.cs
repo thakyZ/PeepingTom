@@ -1,6 +1,8 @@
 ﻿using Dalamud.Game.Command;
 using Dalamud.Plugin;
 using System;
+using System.Collections.Generic;
+using Lumina.Excel.GeneratedSheets;
 
 namespace PeepingTom {
     public class PeepingTomPlugin : IDalamudPlugin {
@@ -12,6 +14,8 @@ namespace PeepingTom {
         internal TargetWatcher Watcher { get; private set; } = null!;
         internal GameFunctions GameFunctions { get; private set; } = null!;
 
+        internal bool InPvp { get; private set; }
+
         public void Initialize(DalamudPluginInterface pluginInterface) {
             this.Interface = pluginInterface ?? throw new ArgumentNullException(nameof(pluginInterface), "DalamudPluginInterface argument was null");
             this.Config = this.Interface.GetPluginConfig() as Configuration ?? new Configuration();
@@ -21,22 +25,32 @@ namespace PeepingTom {
             this.Ui = new PluginUi(this);
 
             this.Interface.CommandManager.AddHandler("/ppeepingtom", new CommandInfo(this.OnCommand) {
-                HelpMessage = "Use with no arguments to show the list. Use with \"c\" or \"config\" to show the config"
+                HelpMessage = "Use with no arguments to show the list. Use with \"c\" or \"config\" to show the config",
             });
             this.Interface.CommandManager.AddHandler("/ptom", new CommandInfo(this.OnCommand) {
-                HelpMessage = "Alias for /ppeepingtom"
+                HelpMessage = "Alias for /ppeepingtom",
             });
             this.Interface.CommandManager.AddHandler("/ppeep", new CommandInfo(this.OnCommand) {
-                HelpMessage = "Alias for /ppeepingtom"
+                HelpMessage = "Alias for /ppeepingtom",
             });
 
             this.Interface.Framework.OnUpdateEvent += this.Watcher.OnFrameworkUpdate;
             this.Interface.ClientState.OnLogin += this.OnLogin;
             this.Interface.ClientState.OnLogout += this.OnLogout;
+            this.Interface.ClientState.TerritoryChanged += this.OnTerritoryChange;
             this.Interface.UiBuilder.OnBuildUi += this.DrawUi;
             this.Interface.UiBuilder.OnOpenConfigUi += this.ConfigUi;
 
             this.Watcher.StartThread();
+        }
+
+        private void OnTerritoryChange(object sender, ushort e) {
+            try {
+                var territory = this.Interface.Data.GetExcelSheet<TerritoryType>().GetRow(e);
+                this.InPvp = territory.IsPvpZone;
+            } catch (KeyNotFoundException) {
+                PluginLog.Warning("Could not get territory for current zone");
+            }
         }
 
         private void OnCommand(string command, string args) {
@@ -60,7 +74,7 @@ namespace PeepingTom {
             this.Watcher.ClearPrevious();
         }
 
-        protected virtual void Dispose(bool includeManaged) {
+        public void Dispose() {
             this.Interface.Framework.OnUpdateEvent -= this.Watcher.OnFrameworkUpdate;
             this.Interface.ClientState.OnLogin -= this.OnLogin;
             this.Interface.ClientState.OnLogout -= this.OnLogout;
@@ -72,11 +86,6 @@ namespace PeepingTom {
             this.Interface.CommandManager.RemoveHandler("/ptom");
             this.Interface.CommandManager.RemoveHandler("/ppeep");
             this.Ui.Dispose();
-        }
-
-        public void Dispose() {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         private void DrawUi() {
