@@ -17,6 +17,7 @@ namespace PeepingTom {
         private Optional<Actor> PreviousFocus { get; set; } = new();
 
         private bool _wantsOpen;
+
         public bool WantsOpen {
             get => this._wantsOpen;
             set => this._wantsOpen = value;
@@ -25,6 +26,7 @@ namespace PeepingTom {
         public bool Visible { get; private set; }
 
         private bool _settingsOpen;
+
         public bool SettingsOpen {
             get => this._settingsOpen;
             set => this._settingsOpen = value;
@@ -199,11 +201,11 @@ namespace PeepingTom {
                         this.Plugin.Config.Save();
                     }
 
-                    // bool openExamine = this.plugin.Config.OpenExamine;
-                    // if (ImGui.Checkbox("Open examine window on Alt-click", ref openExamine)) {
-                    //     this.plugin.Config.OpenExamine = openExamine;
-                    //     this.plugin.Config.Save();
-                    // }
+                    var openExamine = this.Plugin.Config.OpenExamine;
+                    if (ImGui.Checkbox("Open examine window on Alt-click", ref openExamine)) {
+                        this.Plugin.Config.OpenExamine = openExamine;
+                        this.Plugin.Config.Save();
+                    }
 
                     ImGui.EndTabItem();
                 }
@@ -240,6 +242,7 @@ namespace PeepingTom {
                     } else {
                         name = "Invalid device";
                     }
+
                     if (ImGui.BeginCombo("Output device", name)) {
                         if (ImGui.Selectable("Default")) {
                             this.Plugin.Config.SoundDevice = -1;
@@ -362,7 +365,7 @@ namespace PeepingTom {
                                 .Cast<PlayerCharacter>();
                             foreach (var actor in actors) {
                                 var payload = new PlayerPayload(this.Plugin.Interface.Data, actor.Name, actor.HomeWorld.Id);
-                                Payload[] payloads = { payload };
+                                Payload[] payloads = {payload};
                                 this.Plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
                                     MessageBytes = new SeString(payloads).Encode()
                                 });
@@ -375,7 +378,7 @@ namespace PeepingTom {
 
                         if (target != null) {
                             var payload = new PlayerPayload(this.Plugin.Interface.Data, target.Name, target.HomeWorld.Id);
-                            Payload[] payloads = { payload };
+                            Payload[] payloads = {payload};
                             this.Plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
                                 MessageBytes = new SeString(payloads).Encode()
                             });
@@ -407,6 +410,7 @@ namespace PeepingTom {
 
                     dict.Add(actor.ActorId, actor);
                 }
+
                 actors = dict;
             }
 
@@ -414,9 +418,11 @@ namespace PeepingTom {
             if (!this.Plugin.Config.AllowMovement) {
                 flags |= ImGuiWindowFlags.NoMove;
             }
+
             if (!this.Plugin.Config.AllowResize) {
                 flags |= ImGuiWindowFlags.NoResize;
             }
+
             ImGui.SetNextWindowSize(new Vector2(290, 195), ImGuiCond.FirstUseEver);
             if (!ImGui.Begin(this.Plugin.Name, ref this._wantsOpen, flags)) {
                 return;
@@ -425,11 +431,7 @@ namespace PeepingTom {
             {
                 ImGui.Text("Targeting you");
                 ImGui.SameLine();
-                // if (this.plugin.Config.OpenExamine) {
-                //     HelpMarker("Click to link, Alt-click to examine, or right click to target.");
-                // } else {
-                HelpMarker("Click to link or right click to target.");
-                // }
+                HelpMarker(this.Plugin.Config.OpenExamine ? "Click to link, Alt-click to examine, or right click to target." : "Click to link or right click to target.");
 
                 var height = ImGui.GetContentRegionAvail().Y;
                 height -= ImGui.GetStyle().ItemSpacing.Y;
@@ -449,6 +451,7 @@ namespace PeepingTom {
                         actors?.TryGetValue(targeter.ActorId, out actor);
                         this.AddEntry(targeter, actor, ref anyHovered);
                     }
+
                     if (this.Plugin.Config.KeepHistory) {
                         // get a list of the previous targeters that aren't currently targeting
                         var previous = (previousTargeters ?? new List<Targeter>())
@@ -461,8 +464,10 @@ namespace PeepingTom {
                             this.AddEntry(oldTargeter, actor, ref anyHovered, ImGuiSelectableFlags.Disabled);
                         }
                     }
+
                     ImGui.ListBoxFooter();
                 }
+
                 if (this.Plugin.Config.FocusTargetOnHover && !anyHovered && this.PreviousFocus.Get(out var previousFocus)) {
                     if (previousFocus == null) {
                         this.Plugin.Interface.ClientState.Targets.SetFocusTarget(null);
@@ -471,8 +476,10 @@ namespace PeepingTom {
                         // either target the actor if still present or target nothing
                         this.Plugin.Interface.ClientState.Targets.SetFocusTarget(actor);
                     }
+
                     this.PreviousFocus = new Optional<Actor>();
                 }
+
                 ImGui.End();
             }
         }
@@ -508,11 +515,12 @@ namespace PeepingTom {
                 if (!this.PreviousFocus.Present) {
                     this.PreviousFocus = new Optional<Actor>(this.Plugin.Interface.ClientState.Targets.FocusTarget);
                 }
+
                 this.Plugin.Interface.ClientState.Targets.SetFocusTarget(actor);
             }
 
             if (left) {
-                if (false && this.Plugin.Config.OpenExamine && ImGui.GetIO().KeyAlt) {
+                if (this.Plugin.Config.OpenExamine && ImGui.GetIO().KeyAlt) {
                     if (actor != null) {
                         this.Plugin.GameFunctions.OpenExamineWindow(actor);
                     } else {
@@ -527,7 +535,7 @@ namespace PeepingTom {
                     }
                 } else {
                     var payload = new PlayerPayload(this.Plugin.Interface.Data, targeter.Name, targeter.HomeWorld.Id);
-                    Payload[] payloads = { payload };
+                    Payload[] payloads = {payload};
                     this.Plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
                         MessageBytes = new SeString(payloads).Encode(),
                     });

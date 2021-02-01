@@ -18,7 +18,8 @@ namespace PeepingTom {
 
             IntPtr rciPtr;
             try {
-                rciPtr = this.Plugin.Interface.TargetModuleScanner.ScanText("E8 ?? ?? ?? ?? 83 7B 30 00 74 47");
+                // got this by checking what accesses rciData below
+                rciPtr = this.Plugin.Interface.TargetModuleScanner.ScanText("48 89 5C 24 ?? 57 48 83 EC 40 BA ?? ?? ?? ?? 48 8B D9 E8 ?? ?? ?? ?? 48 8B F8 48 85 C0 74 16");
             } catch (KeyNotFoundException) {
                 rciPtr = IntPtr.Zero;
             }
@@ -48,17 +49,28 @@ namespace PeepingTom {
 
             var framework = this.Plugin.Interface.Framework.Address.BaseAddress;
 
+            // NOTES LAST UPDATED: 5.41
+
+            // offsets and stuff come from the beginning of case 0x2c (around line 621 in IDA)
+            // if 29f8 ever changes, I'd just scan for it in old binary and find what it is in the new binary at the same spot
+            // 40 55 53 57 41 54 41 55 41 56 48 8D 6C 24 ??
             var getListPtr = FollowPtrChain(framework, new[] { 0x29f8, 0, 0x110 });
             var getList = Marshal.GetDelegateForFunctionPointer<GetListDelegate>(getListPtr);
             var list = getList(Marshal.ReadIntPtr(framework + 0x29f8));
-            var rciData = Marshal.ReadIntPtr(list + 0x188);
+            var rciData = Marshal.ReadIntPtr(list + 0x198);
 
-            Marshal.WriteInt32(rciData + 0x28, actor.ActorId);
-            Marshal.WriteInt32(rciData + 0x2c, actor.ActorId);
-            Marshal.WriteInt32(rciData + 0x30, actor.ActorId);
+            unsafe {
+                // offsets at sig E8 ?? ?? ?? ?? 33 C0 EB 4C
+                // this is called at the end of the 2c case
+                var raw = (int*) rciData;
+                *(raw + 10) = actor.ActorId;
+                *(raw + 11) = actor.ActorId;
+                *(raw + 12) = actor.ActorId;
+                *(raw + 13) = -536870912;
+                *(raw + 311) = 0;
+            }
 
             this._requestCharInfo(rciData);
         }
-
     }
 }
