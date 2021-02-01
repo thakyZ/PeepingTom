@@ -14,7 +14,7 @@ namespace PeepingTom {
     internal class PluginUi : IDisposable {
         private PeepingTomPlugin Plugin { get; }
 
-        private Optional<Actor> PreviousFocus { get; set; } = new Optional<Actor>();
+        private Optional<Actor> PreviousFocus { get; set; } = new();
 
         private bool _wantsOpen;
         public bool WantsOpen {

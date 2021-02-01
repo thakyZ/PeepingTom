@@ -24,10 +24,10 @@ namespace PeepingTom {
         private volatile bool _needsUpdate = true;
         private Thread? Thread { get; set; }
 
-        private readonly object _dataMutex = new object();
+        private readonly object _dataMutex = new();
         private TargetThreadData? Data { get; set; }
 
-        private readonly Mutex _currentMutex = new Mutex();
+        private readonly Mutex _currentMutex = new();
         private Targeter[] Current { get; set; } = Array.Empty<Targeter>();
 
         public IReadOnlyCollection<Targeter> CurrentTargeters {
@@ -39,8 +39,8 @@ namespace PeepingTom {
             }
         }
 
-        private readonly Mutex _previousMutex = new Mutex();
-        private List<Targeter> Previous { get; } = new List<Targeter>();
+        private readonly Mutex _previousMutex = new();
+        private List<Targeter> Previous { get; } = new();
 
         public IReadOnlyCollection<Targeter> PreviousTargeters {
             get {
@@ -206,7 +206,7 @@ namespace PeepingTom {
                     return;
                 }
 
-                using WaveChannel32 channel = new WaveChannel32(reader) {
+                using WaveChannel32 channel = new(reader) {
                     Volume = this.Plugin.Config.SoundVolume,
                     PadWithZeroes = false,
                 };

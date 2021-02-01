@@ -4,7 +4,7 @@
     <TargetFramework>net48</TargetFramework>
     <RootNamespace>PeepingTom</RootNamespace>
     <Version>1.5.8</Version>
-    <LangVersion>8</LangVersion>
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <AssemblyName>PeepingTom</AssemblyName>
   </PropertyGroup>
@@ -38,7 +38,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="1.0.1" />
+    <PackageReference Include="DalamudPackager" Version="1.2.0" />
     <PackageReference Include="Fody" Version="6.3.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
