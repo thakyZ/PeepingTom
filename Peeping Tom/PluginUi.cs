@@ -500,8 +500,8 @@ namespace PeepingTom {
         private void AddEntry(Targeter targeter, Actor? actor, ref bool anyHovered, ImGuiSelectableFlags flags = ImGuiSelectableFlags.None) {
             ImGui.Selectable(targeter.Name, false, flags);
             var hover = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled);
-            var left = hover && ImGui.IsMouseClicked(0);
-            var right = hover && ImGui.IsMouseClicked(1);
+            var left = hover && ImGui.IsMouseClicked(ImGuiMouseButton.Left);
+            var right = hover && ImGui.IsMouseClicked(ImGuiMouseButton.Right);
 
             actor ??= this.Plugin.Interface.ClientState.Actors
                 .FirstOrDefault(a => a.ActorId == targeter.ActorId);
