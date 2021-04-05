@@ -1,7 +1,4 @@
-﻿using Dalamud.Game.Chat;
-using Dalamud.Game.Chat.SeStringHandling;
-using Dalamud.Game.Chat.SeStringHandling.Payloads;
-using Dalamud.Game.ClientState;
+﻿using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Actors.Types;
 using ImGuiNET;
 using NAudio.Wave;
@@ -9,6 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using Dalamud.Game.Text;
+using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 
 namespace PeepingTom {
     internal class PluginUi : IDisposable {
@@ -367,7 +367,7 @@ namespace PeepingTom {
                                 var payload = new PlayerPayload(this.Plugin.Interface.Data, actor.Name, actor.HomeWorld.Id);
                                 Payload[] payloads = {payload};
                                 this.Plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
-                                    MessageBytes = new SeString(payloads).Encode()
+                                    MessageBytes = new SeString(payloads).Encode(),
                                 });
                             }
                         }
@@ -380,7 +380,7 @@ namespace PeepingTom {
                             var payload = new PlayerPayload(this.Plugin.Interface.Data, target.Name, target.HomeWorld.Id);
                             Payload[] payloads = {payload};
                             this.Plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
-                                MessageBytes = new SeString(payloads).Encode()
+                                MessageBytes = new SeString(payloads).Encode(),
                             });
                         }
                     }
@@ -437,7 +437,7 @@ namespace PeepingTom {
                 height -= ImGui.GetStyle().ItemSpacing.Y;
 
                 var anyHovered = false;
-                if (ImGui.ListBoxHeader("##targeting", new Vector2(-1, height))) {
+                if (ImGui.BeginListBox("##targeting", new Vector2(-1, height))) {
                     // add the two first players for testing
                     //foreach (PlayerCharacter p in this.plugin.Interface.ClientState.Actors
                     //    .Where(actor => actor is PlayerCharacter)
@@ -465,7 +465,7 @@ namespace PeepingTom {
                         }
                     }
 
-                    ImGui.ListBoxFooter();
+                    ImGui.EndListBox();
                 }
 
                 if (this.Plugin.Config.FocusTargetOnHover && !anyHovered && this.PreviousFocus.Get(out var previousFocus)) {
