@@ -13,7 +13,7 @@
         <EmbeddedResource Include="Resources\target.wav"/>
     </ItemGroup>
     <ItemGroup>
-        <Reference Include="Dalamud, Version=5.2.4.2, Culture=neutral, PublicKeyToken=null">
+        <Reference Include="Dalamud, Version=5.2.4.3, Culture=neutral, PublicKeyToken=null">
             <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Dalamud.dll</HintPath>
             <Private>False</Private>
         </Reference>

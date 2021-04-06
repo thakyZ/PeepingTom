@@ -9,6 +9,7 @@ using System.Numerics;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.Interface;
 
 namespace PeepingTom {
     internal class PluginUi : IDisposable {
@@ -498,7 +499,27 @@ namespace PeepingTom {
         }
 
         private void AddEntry(Targeter targeter, Actor? actor, ref bool anyHovered, ImGuiSelectableFlags flags = ImGuiSelectableFlags.None) {
+            ImGui.BeginGroup();
+
             ImGui.Selectable(targeter.Name, false, flags);
+
+            var time = DateTime.UtcNow - targeter.When >= TimeSpan.FromDays(1)
+                ? targeter.When.ToLocalTime().ToString("dd/MM")
+                : targeter.When.ToLocalTime().ToString("t");
+            ImGui.SameLine(ImGui.GetWindowSize().X - ImGui.GetStyle().ItemSpacing.X - ImGui.CalcTextSize(time).X);
+
+            if (flags.HasFlag(ImGuiSelectableFlags.Disabled)) {
+                ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int) ImGuiCol.TextDisabled]);
+            }
+
+            ImGui.TextUnformatted(time);
+
+            if (flags.HasFlag(ImGuiSelectableFlags.Disabled)) {
+                ImGui.PopStyleColor();
+            }
+
+            ImGui.EndGroup();
+
             var hover = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled);
             var left = hover && ImGui.IsMouseClicked(ImGuiMouseButton.Left);
             var right = hover && ImGui.IsMouseClicked(ImGuiMouseButton.Right);
@@ -554,10 +575,10 @@ namespace PeepingTom {
                 return;
             }
 
-            ImGui.PushClipRect(new Vector2(0, 0), ImGui.GetIO().DisplaySize, false);
+            ImGui.PushClipRect(ImGuiHelpers.MainViewport.Pos, ImGuiHelpers.MainViewport.Pos + ImGuiHelpers.MainViewport.Size, false);
 
             ImGui.GetWindowDrawList().AddCircleFilled(
-                new Vector2(screenPos.X, screenPos.Y),
+                ImGuiHelpers.MainViewport.Pos + new Vector2(screenPos.X, screenPos.Y),
                 size,
                 ImGui.GetColorU32(colour),
                 100

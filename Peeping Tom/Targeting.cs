@@ -9,6 +9,7 @@ namespace PeepingTom {
         public string Name { get; }
         public World HomeWorld { get; }
         public int ActorId { get; }
+        public DateTime When { get; }
 
         public Targeter(PlayerCharacter character) {
             if (character == null) {
@@ -17,6 +18,7 @@ namespace PeepingTom {
             this.Name = character.Name;
             this.HomeWorld = character.HomeWorld;
             this.ActorId = character.ActorId;
+            this.When = DateTime.UtcNow;
         }
 
         public PlayerCharacter? GetPlayerCharacter(DalamudPluginInterface pi) {
