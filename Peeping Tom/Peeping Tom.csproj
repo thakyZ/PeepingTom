@@ -40,16 +40,9 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="DalamudPackager" Version="1.2.1"/>
-        <PackageReference Include="Fody" Version="6.5.1">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="ILMerge.Fody" Version="1.16.0">
-            <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
-        <PackageReference Include="Resourcer.Fody" Version="1.8.0">
-            <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
+        <PackageReference Include="Fody" Version="6.5.1" PrivateAssets="all"/>
+        <PackageReference Include="ILMerge.Fody" Version="1.16.0" PrivateAssets="all"/>
         <PackageReference Include="NAudio" Version="2.0.0"/>
+        <PackageReference Include="Resourcer.Fody" Version="1.8.0" PrivateAssets="all"/>
     </ItemGroup>
 </Project>
