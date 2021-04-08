@@ -13,27 +13,27 @@
         <EmbeddedResource Include="Resources\target.wav"/>
     </ItemGroup>
     <ItemGroup>
-        <Reference Include="Dalamud, Version=5.2.4.3, Culture=neutral, PublicKeyToken=null">
+        <Reference Include="Dalamud">
             <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Dalamud.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="ImGui.NET, Version=1.72.0.0, Culture=neutral, PublicKeyToken=null">
+        <Reference Include="ImGui.NET">
             <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\ImGui.NET.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="ImGuiScene, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <Reference Include="ImGuiScene">
             <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\ImGuiScene.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="Lumina, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <Reference Include="Lumina">
             <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Lumina.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="Lumina.Excel, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <Reference Include="Lumina.Excel">
             <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Lumina.Excel.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="SharpDX.Mathematics, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1">
+        <Reference Include="SharpDX.Mathematics">
             <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\SharpDX.Mathematics.dll</HintPath>
             <Private>False</Private>
         </Reference>
