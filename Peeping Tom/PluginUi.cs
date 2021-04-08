@@ -545,14 +545,11 @@ namespace PeepingTom {
                     if (actor != null) {
                         this.Plugin.GameFunctions.OpenExamineWindow(actor);
                     } else {
-                        Payload[] payloads = {
-                            new TextPayload($"[{this.Plugin.Name}] "),
+                        var error = new SeString(new Payload[] {
                             new PlayerPayload(this.Plugin.Interface.Data, targeter.Name, targeter.HomeWorld.Id),
                             new TextPayload(" is not close enough to examine."),
-                        };
-                        this.Plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
-                            MessageBytes = new SeString(payloads).Encode(),
                         });
+                        this.Plugin.Interface.Framework.Gui.Toast.ShowError(error);
                     }
                 } else {
                     var payload = new PlayerPayload(this.Plugin.Interface.Data, targeter.Name, targeter.HomeWorld.Id);
