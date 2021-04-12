@@ -437,12 +437,6 @@ namespace PeepingTom {
                 var height = ImGui.GetContentRegionAvail().Y;
                 height -= ImGui.GetStyle().ItemSpacing.Y;
 
-                var previousWithoutCurrent = (previousTargeters ?? new List<Targeter>())
-                    .Where(old => targeting.All(actor => actor.ActorId != old.ActorId))
-                    .ToList();
-                var numItems = targeting.Count + Math.Min(previousWithoutCurrent.Count, this.Plugin.Config.NumHistory);
-                var willScroll = (ImGui.CalcTextSize("A").Y + ImGui.GetStyle().ItemInnerSpacing.Y) * numItems > height;
-
                 var anyHovered = false;
                 if (ImGui.BeginListBox("##targeting", new Vector2(-1, height))) {
                     // add the two first players for testing
@@ -451,23 +445,25 @@ namespace PeepingTom {
                     //     .Skip(1)
                     //     .Select(actor => actor as PlayerCharacter)
                     //     .Take(2)) {
-                    //     this.AddEntry(new Targeter(p), p, ref anyHovered, willScroll);
+                    //     this.AddEntry(new Targeter(p), p, ref anyHovered);
                     // }
 
                     foreach (var targeter in targeting) {
                         Actor? actor = null;
                         actors?.TryGetValue(targeter.ActorId, out actor);
-                        this.AddEntry(targeter, actor, ref anyHovered, willScroll);
+                        this.AddEntry(targeter, actor, ref anyHovered);
                     }
 
                     if (this.Plugin.Config.KeepHistory) {
                         // get a list of the previous targeters that aren't currently targeting
-                        var previous = previousWithoutCurrent.Take(this.Plugin.Config.NumHistory);
+                        var previous = (previousTargeters ?? new List<Targeter>())
+                            .Where(old => targeting.All(actor => actor.ActorId != old.ActorId))
+                            .Take(this.Plugin.Config.NumHistory);
                         // add previous targeters to the list
                         foreach (var oldTargeter in previous) {
                             Actor? actor = null;
                             actors?.TryGetValue(oldTargeter.ActorId, out actor);
-                            this.AddEntry(oldTargeter, actor, ref anyHovered, willScroll, ImGuiSelectableFlags.Disabled);
+                            this.AddEntry(oldTargeter, actor, ref anyHovered, ImGuiSelectableFlags.Disabled);
                         }
                     }
 
@@ -503,7 +499,7 @@ namespace PeepingTom {
             ImGui.EndTooltip();
         }
 
-        private void AddEntry(Targeter targeter, Actor? actor, ref bool anyHovered, bool willScroll, ImGuiSelectableFlags flags = ImGuiSelectableFlags.None) {
+        private void AddEntry(Targeter targeter, Actor? actor, ref bool anyHovered, ImGuiSelectableFlags flags = ImGuiSelectableFlags.None) {
             ImGui.BeginGroup();
 
             ImGui.Selectable(targeter.Name, false, flags);
@@ -511,7 +507,7 @@ namespace PeepingTom {
             var time = DateTime.UtcNow - targeter.When >= TimeSpan.FromDays(1)
                 ? targeter.When.ToLocalTime().ToString("dd/MM")
                 : targeter.When.ToLocalTime().ToString("t");
-            ImGui.SameLine(ImGui.GetWindowSize().X - ImGui.GetStyle().ItemSpacing.X - ImGui.CalcTextSize(time).X - (willScroll ? ImGui.GetStyle().ScrollbarSize : 0));
+            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize(time).X);
 
             if (flags.HasFlag(ImGuiSelectableFlags.Disabled)) {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int) ImGuiCol.TextDisabled]);
