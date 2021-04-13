@@ -47,17 +47,16 @@ namespace PeepingTom {
                 return;
             }
 
-            var framework = this.Plugin.Interface.Framework.Address.BaseAddress;
-
-            // NOTES LAST UPDATED: 5.41
+            // NOTES LAST UPDATED: 5.45
 
             // offsets and stuff come from the beginning of case 0x2c (around line 621 in IDA)
             // if 29f8 ever changes, I'd just scan for it in old binary and find what it is in the new binary at the same spot
             // 40 55 53 57 41 54 41 55 41 56 48 8D 6C 24 ??
-            var getListPtr = FollowPtrChain(framework, new[] { 0x29f8, 0, 0x110 });
+            var uiModule = this.Plugin.Interface.Framework.Gui.GetUIModule();
+            var getListPtr = FollowPtrChain(uiModule, new[] {0, 0x110});
             var getList = Marshal.GetDelegateForFunctionPointer<GetListDelegate>(getListPtr);
-            var list = getList(Marshal.ReadIntPtr(framework + 0x29f8));
-            var rciData = Marshal.ReadIntPtr(list + 0x198);
+            var list = getList(uiModule);
+            var rciData = Marshal.ReadIntPtr(list + 0x1A0);
 
             unsafe {
                 // offsets at sig E8 ?? ?? ?? ?? 33 C0 EB 4C
