@@ -3,6 +3,7 @@ using Dalamud.Plugin;
 using System;
 using System.Collections.Generic;
 using Lumina.Excel.GeneratedSheets;
+using XivCommon;
 
 namespace PeepingTom {
     public class PeepingTomPlugin : IDalamudPlugin {
@@ -12,16 +13,16 @@ namespace PeepingTom {
         internal Configuration Config { get; private set; } = null!;
         internal PluginUi Ui { get; private set; } = null!;
         internal TargetWatcher Watcher { get; private set; } = null!;
-        internal GameFunctions GameFunctions { get; private set; } = null!;
+        internal XivCommonBase Common { get; private set; } = null!;
 
         internal bool InPvp { get; private set; }
 
         public void Initialize(DalamudPluginInterface pluginInterface) {
-            this.Interface = pluginInterface ?? throw new ArgumentNullException(nameof(pluginInterface), "DalamudPluginInterface argument was null");
+            this.Interface = pluginInterface;
+            this.Common = new XivCommonBase(this.Interface);
             this.Config = this.Interface.GetPluginConfig() as Configuration ?? new Configuration();
             this.Config.Initialize(this.Interface);
             this.Watcher = new TargetWatcher(this);
-            this.GameFunctions = new GameFunctions(this);
             this.Ui = new PluginUi(this);
 
             this.Interface.CommandManager.AddHandler("/ppeepingtom", new CommandInfo(this.OnCommand) {
@@ -42,6 +43,21 @@ namespace PeepingTom {
             this.Interface.UiBuilder.OnOpenConfigUi += this.ConfigUi;
 
             this.Watcher.StartThread();
+        }
+
+        public void Dispose() {
+            this.Common.Dispose();
+            this.Interface.Framework.OnUpdateEvent -= this.Watcher.OnFrameworkUpdate;
+            this.Interface.ClientState.OnLogin -= this.OnLogin;
+            this.Interface.ClientState.OnLogout -= this.OnLogout;
+            this.Watcher.WaitStopThread();
+            this.Watcher.Dispose();
+            this.Interface.UiBuilder.OnBuildUi -= this.DrawUi;
+            this.Interface.UiBuilder.OnOpenConfigUi -= this.ConfigUi;
+            this.Interface.CommandManager.RemoveHandler("/ppeepingtom");
+            this.Interface.CommandManager.RemoveHandler("/ptom");
+            this.Interface.CommandManager.RemoveHandler("/ppeep");
+            this.Ui.Dispose();
         }
 
         private void OnTerritoryChange(object sender, ushort e) {
@@ -72,20 +88,6 @@ namespace PeepingTom {
         private void OnLogout(object sender, EventArgs args) {
             this.Ui.WantsOpen = false;
             this.Watcher.ClearPrevious();
-        }
-
-        public void Dispose() {
-            this.Interface.Framework.OnUpdateEvent -= this.Watcher.OnFrameworkUpdate;
-            this.Interface.ClientState.OnLogin -= this.OnLogin;
-            this.Interface.ClientState.OnLogout -= this.OnLogout;
-            this.Watcher.WaitStopThread();
-            this.Watcher.Dispose();
-            this.Interface.UiBuilder.OnBuildUi -= this.DrawUi;
-            this.Interface.UiBuilder.OnOpenConfigUi -= this.ConfigUi;
-            this.Interface.CommandManager.RemoveHandler("/ppeepingtom");
-            this.Interface.CommandManager.RemoveHandler("/ptom");
-            this.Interface.CommandManager.RemoveHandler("/ppeep");
-            this.Ui.Dispose();
         }
 
         private void DrawUi() {

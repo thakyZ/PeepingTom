@@ -544,7 +544,7 @@ namespace PeepingTom {
             if (left) {
                 if (this.Plugin.Config.OpenExamine && ImGui.GetIO().KeyAlt) {
                     if (actor != null) {
-                        this.Plugin.GameFunctions.OpenExamineWindow(actor);
+                        this.Plugin.Common.Functions.Examine.OpenExamineWindow(actor);
                     } else {
                         var error = new SeString(new Payload[] {
                             new PlayerPayload(this.Plugin.Interface.Data, targeter.Name, targeter.HomeWorld.Id),
