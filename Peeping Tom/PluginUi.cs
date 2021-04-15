@@ -86,7 +86,9 @@ namespace PeepingTom {
                                            | ImGuiWindowFlags.NoSavedSettings
                                            | ImGuiWindowFlags.NoDecoration
                                            | ImGuiWindowFlags.NoScrollWithMouse;
+            ImGuiHelpers.ForceNextWindowMainViewport();
             if (!ImGui.Begin("Peeping Tom targeting indicator dummy window", flags)) {
+                ImGui.End();
                 return;
             }
 
@@ -119,6 +121,7 @@ namespace PeepingTom {
         private void ShowSettings() {
             ImGui.SetNextWindowSize(new Vector2(700, 250));
             if (!ImGui.Begin($"{this.Plugin.Name} settings", ref this._settingsOpen, ImGuiWindowFlags.NoResize)) {
+                ImGui.End();
                 return;
             }
 
@@ -426,6 +429,7 @@ namespace PeepingTom {
 
             ImGui.SetNextWindowSize(new Vector2(290, 195), ImGuiCond.FirstUseEver);
             if (!ImGui.Begin(this.Plugin.Name, ref this._wantsOpen, flags)) {
+                ImGui.End();
                 return;
             }
 
