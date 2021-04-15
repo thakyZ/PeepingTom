@@ -24,6 +24,7 @@ namespace PeepingTom {
         public bool KeepHistory { get; set; } = true;
         public bool HistoryWhenClosed { get; set; } = true;
         public int NumHistory { get; set; } = 5;
+        public bool ShowTimestamps { get; set; } = true;
 
         public bool LogParty { get; set; } = true;
         public bool LogAlliance { get; set; }
@@ -31,7 +32,7 @@ namespace PeepingTom {
         public bool LogSelf { get; set; }
 
         public bool FocusTargetOnHover { get; set; } = true;
-        public bool OpenExamine { get; set; } = false;
+        public bool OpenExamine { get; set; }
 
         public bool PlaySoundOnTarget { get; set; }
         public string? SoundPath { get; set; }

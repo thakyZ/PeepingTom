@@ -346,6 +346,12 @@ namespace PeepingTom {
                         this.Plugin.Config.Save();
                     }
 
+                    var showTimestamps = this.Plugin.Config.ShowTimestamps;
+                    if (ImGui.Checkbox("Show timestamps", ref showTimestamps)) {
+                        this.Plugin.Config.ShowTimestamps = showTimestamps;
+                        this.Plugin.Config.Save();
+                    }
+
                     ImGui.EndTabItem();
                 }
 
@@ -508,19 +514,21 @@ namespace PeepingTom {
 
             ImGui.Selectable(targeter.Name, false, flags);
 
-            var time = DateTime.UtcNow - targeter.When >= TimeSpan.FromDays(1)
-                ? targeter.When.ToLocalTime().ToString("dd/MM")
-                : targeter.When.ToLocalTime().ToString("t");
-            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize(time).X);
+            if (this.Plugin.Config.ShowTimestamps) {
+                var time = DateTime.UtcNow - targeter.When >= TimeSpan.FromDays(1)
+                    ? targeter.When.ToLocalTime().ToString("dd/MM")
+                    : targeter.When.ToLocalTime().ToString("t");
+                ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize(time).X);
 
-            if (flags.HasFlag(ImGuiSelectableFlags.Disabled)) {
-                ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int) ImGuiCol.TextDisabled]);
-            }
+                if (flags.HasFlag(ImGuiSelectableFlags.Disabled)) {
+                    ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int) ImGuiCol.TextDisabled]);
+                }
 
-            ImGui.TextUnformatted(time);
+                ImGui.TextUnformatted(time);
 
-            if (flags.HasFlag(ImGuiSelectableFlags.Disabled)) {
-                ImGui.PopStyleColor();
+                if (flags.HasFlag(ImGuiSelectableFlags.Disabled)) {
+                    ImGui.PopStyleColor();
+                }
             }
 
             ImGui.EndGroup();
