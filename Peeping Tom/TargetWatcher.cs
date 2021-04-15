@@ -206,7 +206,7 @@ namespace PeepingTom {
                     return;
                 }
 
-                using WaveChannel32 channel = new(reader) {
+                using var channel = new WaveChannel32(reader) {
                     Volume = this.Plugin.Config.SoundVolume,
                     PadWithZeroes = false,
                 };
@@ -226,7 +226,7 @@ namespace PeepingTom {
         }
 
         private void SendError(string message) {
-            Payload[] payloads = {
+            var payloads = new Payload[] {
                 new TextPayload($"[{this.Plugin.Name}] {message}"),
             };
             this.Plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
