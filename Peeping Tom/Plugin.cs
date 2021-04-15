@@ -6,6 +6,7 @@ using Lumina.Excel.GeneratedSheets;
 using XivCommon;
 
 namespace PeepingTom {
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class PeepingTomPlugin : IDalamudPlugin {
         public string Name => "Peeping Tom";
 
@@ -70,7 +71,7 @@ namespace PeepingTom {
         }
 
         private void OnCommand(string command, string args) {
-            if (args == "config" || args == "c") {
+            if (args is "config" or "c") {
                 this.Ui.SettingsOpen = true;
             } else {
                 this.Ui.WantsOpen = true;
