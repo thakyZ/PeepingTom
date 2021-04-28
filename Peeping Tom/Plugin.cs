@@ -2,7 +2,9 @@
 using Dalamud.Plugin;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Lumina.Excel.GeneratedSheets;
+using PeepingTom.Resources;
 using XivCommon;
 
 namespace PeepingTom {
@@ -25,6 +27,10 @@ namespace PeepingTom {
             this.Config.Initialize(this.Interface);
             this.Watcher = new TargetWatcher(this);
             this.Ui = new PluginUi(this);
+
+            Util.PreLoadResourcesFromMainAssembly("PeepingTom.Resources.Language.");
+            OnLanguageChange(this.Interface.UiLanguage);
+            this.Interface.OnLanguageChanged += OnLanguageChange;
 
             this.Interface.CommandManager.AddHandler("/ppeepingtom", new CommandInfo(this.OnCommand) {
                 HelpMessage = "Use with no arguments to show the list. Use with \"c\" or \"config\" to show the config",
@@ -59,6 +65,11 @@ namespace PeepingTom {
             this.Interface.CommandManager.RemoveHandler("/ptom");
             this.Interface.CommandManager.RemoveHandler("/ppeep");
             this.Ui.Dispose();
+            this.Interface.OnLanguageChanged -= OnLanguageChange;
+        }
+
+        private static void OnLanguageChange(string langCode) {
+            Language.Culture = new CultureInfo(langCode);
         }
 
         private void OnTerritoryChange(object sender, ushort e) {

@@ -46,6 +46,7 @@
         <PackageReference Include="DalamudPackager" Version="1.2.1"/>
         <PackageReference Include="Fody" Version="6.5.1" PrivateAssets="all"/>
         <PackageReference Include="ILMerge.Fody" Version="1.16.0" PrivateAssets="all"/>
+        <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.18.2"/>
         <PackageReference Include="NAudio" Version="2.0.0"/>
         <PackageReference Include="Resourcer.Fody" Version="1.8.0" PrivateAssets="all"/>
         <PackageReference Include="XivCommon" Version="1.2.0"/>
@@ -57,4 +58,17 @@
             <DependentUpon>Language.resx</DependentUpon>
         </Compile>
     </ItemGroup>
+    <Target Name="MergeLocalisedResources" AfterTargets="Build">
+        <ItemGroup>
+            <InputAssemblies Include="$(OutputPath)\$(AssemblyName).dll"/>
+            <InputAssemblies Include="$(OutputPath)\*\$(AssemblyName).resources.dll"/>
+        </ItemGroup>
+        <ILRepack
+                Parallel="true"
+                InputAssemblies="@(InputAssemblies)"
+                LibraryPath="$(OutputPath);$(AppData)\XIVLauncher\addon\Hooks\dev"
+                TargetKind="Dll"
+                OutputFile="$(OutputPath)\$(AssemblyName).dll"
+        />
+    </Target>
 </Project>
