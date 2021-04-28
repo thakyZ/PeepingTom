@@ -122,13 +122,13 @@ namespace PeepingTom {
         private void ShowSettings() {
             ImGui.SetNextWindowSize(new Vector2(700, 250));
             var windowTitle = string.Format(Language.SettingsTitle, this.Plugin.Name);
-            if (!ImGui.Begin(windowTitle, ref this._settingsOpen, ImGuiWindowFlags.NoResize)) {
+            if (!ImGui.Begin($"{windowTitle}###ptom-settings", ref this._settingsOpen, ImGuiWindowFlags.NoResize)) {
                 ImGui.End();
                 return;
             }
 
             if (ImGui.BeginTabBar("##settings-tabs")) {
-                if (ImGui.BeginTabItem(Language.SettingsMarkersTab)) {
+                if (ImGui.BeginTabItem($"{Language.SettingsMarkersTab}###markers-tab")) {
                     var markTargeted = this.Plugin.Config.MarkTargeted;
                     if (ImGui.Checkbox(Language.SettingsMarkersMarkTarget, ref markTargeted)) {
                         this.Plugin.Config.MarkTargeted = markTargeted;
@@ -172,7 +172,7 @@ namespace PeepingTom {
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem(Language.SettingsFilterTab)) {
+                if (ImGui.BeginTabItem($"{Language.SettingsFilterTab}###filters-tab")) {
                     var showParty = this.Plugin.Config.LogParty;
                     if (ImGui.Checkbox(Language.SettingsFilterLogParty, ref showParty)) {
                         this.Plugin.Config.LogParty = showParty;
@@ -200,7 +200,7 @@ namespace PeepingTom {
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem(Language.SettingsBehaviourTab)) {
+                if (ImGui.BeginTabItem($"{Language.SettingsBehaviourTab}###behaviour-tab")) {
                     var focusTarget = this.Plugin.Config.FocusTargetOnHover;
                     if (ImGui.Checkbox(Language.SettingsBehaviourFocusHover, ref focusTarget)) {
                         this.Plugin.Config.FocusTargetOnHover = focusTarget;
@@ -216,7 +216,7 @@ namespace PeepingTom {
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem(Language.SettingsSoundTab)) {
+                if (ImGui.BeginTabItem($"{Language.SettingsSoundTab}###sound-tab")) {
                     var playSound = this.Plugin.Config.PlaySoundOnTarget;
                     if (ImGui.Checkbox(Language.SettingsSoundEnabled, ref playSound)) {
                         this.Plugin.Config.PlaySoundOnTarget = playSound;
@@ -249,7 +249,7 @@ namespace PeepingTom {
                         name = Language.SettingsSoundInvalidDevice;
                     }
 
-                    if (ImGui.BeginCombo(Language.SettingsSoundOutputDevice, name)) {
+                    if (ImGui.BeginCombo($"{Language.SettingsSoundOutputDevice}###sound-output-device-combo", name)) {
                         if (ImGui.Selectable(Language.SettingsSoundDefaultDevice)) {
                             this.Plugin.Config.SoundDevice = -1;
                             this.Plugin.Config.Save();
@@ -286,7 +286,7 @@ namespace PeepingTom {
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem(Language.SettingsWindowTab)) {
+                if (ImGui.BeginTabItem($"{Language.SettingsWindowTab}###window-tab")) {
                     var openOnLogin = this.Plugin.Config.OpenOnLogin;
                     if (ImGui.Checkbox(Language.SettingsWindowOpenLogin, ref openOnLogin)) {
                         this.Plugin.Config.OpenOnLogin = openOnLogin;
@@ -328,7 +328,7 @@ namespace PeepingTom {
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem(Language.SettingsHistoryTab)) {
+                if (ImGui.BeginTabItem($"{Language.SettingsHistoryTab}###history-tab")) {
                     var keepHistory = this.Plugin.Config.KeepHistory;
                     if (ImGui.Checkbox(Language.SettingsHistoryEnabled, ref keepHistory)) {
                         this.Plugin.Config.KeepHistory = keepHistory;
@@ -357,7 +357,7 @@ namespace PeepingTom {
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem(Language.SettingsAdvancedTab)) {
+                if (ImGui.BeginTabItem($"{Language.SettingsAdvancedTab}###advanced-tab")) {
                     var pollFrequency = this.Plugin.Config.PollFrequency;
                     if (ImGui.DragInt(Language.SettingsAdvancedPollFrequency, ref pollFrequency, .1f, 1, 1600)) {
                         this.Plugin.Config.PollFrequency = pollFrequency;
