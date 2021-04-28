@@ -12,6 +12,7 @@ using System.Threading;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using PeepingTom.Resources;
 
 namespace PeepingTom {
     internal class TargetWatcher : IDisposable {
@@ -52,7 +53,7 @@ namespace PeepingTom {
         }
 
         public TargetWatcher(PeepingTomPlugin plugin) {
-            this.Plugin = plugin ?? throw new ArgumentNullException(nameof(plugin), "PeepingTomPlugin cannot be null");
+            this.Plugin = plugin;
         }
 
         public void ClearPrevious() {
@@ -202,7 +203,8 @@ namespace PeepingTom {
                         reader = new AudioFileReader(this.Plugin.Config.SoundPath);
                     }
                 } catch (Exception e) {
-                    this.SendError($"Could not play sound file: {e.Message}");
+                    var error = string.Format(Language.SoundChatError, e.Message);
+                    this.SendError(error);
                     return;
                 }
 

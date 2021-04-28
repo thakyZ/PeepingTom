@@ -10,6 +10,7 @@ using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface;
+using PeepingTom.Resources;
 
 namespace PeepingTom {
     internal class PluginUi : IDisposable {
@@ -34,7 +35,7 @@ namespace PeepingTom {
         }
 
         public PluginUi(PeepingTomPlugin plugin) {
-            this.Plugin = plugin ?? throw new ArgumentNullException(nameof(plugin), "PeepingTomPlugin cannot be null");
+            this.Plugin = plugin;
         }
 
         public void Dispose() {
@@ -120,27 +121,28 @@ namespace PeepingTom {
 
         private void ShowSettings() {
             ImGui.SetNextWindowSize(new Vector2(700, 250));
-            if (!ImGui.Begin($"{this.Plugin.Name} settings", ref this._settingsOpen, ImGuiWindowFlags.NoResize)) {
+            var windowTitle = string.Format(Language.SettingsTitle, this.Plugin.Name);
+            if (!ImGui.Begin(windowTitle, ref this._settingsOpen, ImGuiWindowFlags.NoResize)) {
                 ImGui.End();
                 return;
             }
 
             if (ImGui.BeginTabBar("##settings-tabs")) {
-                if (ImGui.BeginTabItem("Markers")) {
+                if (ImGui.BeginTabItem(Language.SettingsMarkersTab)) {
                     var markTargeted = this.Plugin.Config.MarkTargeted;
-                    if (ImGui.Checkbox("Mark your target", ref markTargeted)) {
+                    if (ImGui.Checkbox(Language.SettingsMarkersMarkTarget, ref markTargeted)) {
                         this.Plugin.Config.MarkTargeted = markTargeted;
                         this.Plugin.Config.Save();
                     }
 
                     var targetedColour = this.Plugin.Config.TargetedColour;
-                    if (ImGui.ColorEdit4("Target mark colour", ref targetedColour)) {
+                    if (ImGui.ColorEdit4(Language.SettingsMarkersMarkTargetColour, ref targetedColour)) {
                         this.Plugin.Config.TargetedColour = targetedColour;
                         this.Plugin.Config.Save();
                     }
 
                     var targetedSize = this.Plugin.Config.TargetedSize;
-                    if (ImGui.DragFloat("Target mark size", ref targetedSize, 0.01f, 0f, 15f)) {
+                    if (ImGui.DragFloat(Language.SettingsMarkersMarkTargetSize, ref targetedSize, 0.01f, 0f, 15f)) {
                         targetedSize = Math.Max(0f, targetedSize);
                         this.Plugin.Config.TargetedSize = targetedSize;
                         this.Plugin.Config.Save();
@@ -149,19 +151,19 @@ namespace PeepingTom {
                     ImGui.Spacing();
 
                     var markTargeting = this.Plugin.Config.MarkTargeting;
-                    if (ImGui.Checkbox("Mark targeting you", ref markTargeting)) {
+                    if (ImGui.Checkbox(Language.SettingsMarkersMarkTargeting, ref markTargeting)) {
                         this.Plugin.Config.MarkTargeting = markTargeting;
                         this.Plugin.Config.Save();
                     }
 
                     var targetingColour = this.Plugin.Config.TargetingColour;
-                    if (ImGui.ColorEdit4("Targeting mark colour", ref targetingColour)) {
+                    if (ImGui.ColorEdit4(Language.SettingsMarkersMarkTargetingColour, ref targetingColour)) {
                         this.Plugin.Config.TargetingColour = targetingColour;
                         this.Plugin.Config.Save();
                     }
 
                     var targetingSize = this.Plugin.Config.TargetingSize;
-                    if (ImGui.DragFloat("Targeting mark size", ref targetingSize, 0.01f, 0f, 15f)) {
+                    if (ImGui.DragFloat(Language.SettingsMarkersMarkTargetingSize, ref targetingSize, 0.01f, 0f, 15f)) {
                         targetingSize = Math.Max(0f, targetingSize);
                         this.Plugin.Config.TargetingSize = targetingSize;
                         this.Plugin.Config.Save();
@@ -170,27 +172,27 @@ namespace PeepingTom {
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("Filters")) {
+                if (ImGui.BeginTabItem(Language.SettingsFilterTab)) {
                     var showParty = this.Plugin.Config.LogParty;
-                    if (ImGui.Checkbox("Log party members", ref showParty)) {
+                    if (ImGui.Checkbox(Language.SettingsFilterLogParty, ref showParty)) {
                         this.Plugin.Config.LogParty = showParty;
                         this.Plugin.Config.Save();
                     }
 
                     var logAlliance = this.Plugin.Config.LogAlliance;
-                    if (ImGui.Checkbox("Log alliance members", ref logAlliance)) {
+                    if (ImGui.Checkbox(Language.SettingsFilterLogAlliance, ref logAlliance)) {
                         this.Plugin.Config.LogAlliance = logAlliance;
                         this.Plugin.Config.Save();
                     }
 
                     var logInCombat = this.Plugin.Config.LogInCombat;
-                    if (ImGui.Checkbox("Log targeters engaged in combat", ref logInCombat)) {
+                    if (ImGui.Checkbox(Language.SettingsFilterLogCombat, ref logInCombat)) {
                         this.Plugin.Config.LogInCombat = logInCombat;
                         this.Plugin.Config.Save();
                     }
 
                     var logSelf = this.Plugin.Config.LogSelf;
-                    if (ImGui.Checkbox("Log yourself", ref logSelf)) {
+                    if (ImGui.Checkbox(Language.SettingsFilterLogSelf, ref logSelf)) {
                         this.Plugin.Config.LogSelf = logSelf;
                         this.Plugin.Config.Save();
                     }
@@ -198,15 +200,15 @@ namespace PeepingTom {
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("Behaviour")) {
+                if (ImGui.BeginTabItem(Language.SettingsBehaviourTab)) {
                     var focusTarget = this.Plugin.Config.FocusTargetOnHover;
-                    if (ImGui.Checkbox("Focus target on hover", ref focusTarget)) {
+                    if (ImGui.Checkbox(Language.SettingsBehaviourFocusHover, ref focusTarget)) {
                         this.Plugin.Config.FocusTargetOnHover = focusTarget;
                         this.Plugin.Config.Save();
                     }
 
                     var openExamine = this.Plugin.Config.OpenExamine;
-                    if (ImGui.Checkbox("Open examine window on Alt-click", ref openExamine)) {
+                    if (ImGui.Checkbox(Language.SettingsBehaviourExamineEnabled, ref openExamine)) {
                         this.Plugin.Config.OpenExamine = openExamine;
                         this.Plugin.Config.Save();
                     }
@@ -214,24 +216,24 @@ namespace PeepingTom {
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("Sound")) {
+                if (ImGui.BeginTabItem(Language.SettingsSoundTab)) {
                     var playSound = this.Plugin.Config.PlaySoundOnTarget;
-                    if (ImGui.Checkbox("Play sound when targeted", ref playSound)) {
+                    if (ImGui.Checkbox(Language.SettingsSoundEnabled, ref playSound)) {
                         this.Plugin.Config.PlaySoundOnTarget = playSound;
                         this.Plugin.Config.Save();
                     }
 
                     var path = this.Plugin.Config.SoundPath ?? "";
-                    if (ImGui.InputText("Path to audio file", ref path, 1_000)) {
+                    if (ImGui.InputText(Language.SettingsSoundPath, ref path, 1_000)) {
                         path = path.Trim();
                         this.Plugin.Config.SoundPath = path.Length == 0 ? null : path;
                         this.Plugin.Config.Save();
                     }
 
-                    ImGui.Text("Leave this blank to use a built-in sound.");
+                    ImGui.Text(Language.SettingsSoundPathHelp);
 
                     var volume = this.Plugin.Config.SoundVolume * 100f;
-                    if (ImGui.DragFloat("Volume of sound", ref volume, .1f, 0f, 100f, "%.1f%%")) {
+                    if (ImGui.DragFloat(Language.SettingsSoundVolume, ref volume, .1f, 0f, 100f, "%.1f%%")) {
                         this.Plugin.Config.SoundVolume = Math.Max(0f, Math.Min(1f, volume / 100f));
                         this.Plugin.Config.Save();
                     }
@@ -239,16 +241,16 @@ namespace PeepingTom {
                     var soundDevice = this.Plugin.Config.SoundDevice;
                     string name;
                     if (soundDevice == -1) {
-                        name = "Default";
+                        name = Language.SettingsSoundDefaultDevice;
                     } else if (soundDevice > -1 && soundDevice < WaveOut.DeviceCount) {
                         var caps = WaveOut.GetCapabilities(soundDevice);
                         name = caps.ProductName;
                     } else {
-                        name = "Invalid device";
+                        name = Language.SettingsSoundInvalidDevice;
                     }
 
-                    if (ImGui.BeginCombo("Output device", name)) {
-                        if (ImGui.Selectable("Default")) {
+                    if (ImGui.BeginCombo(Language.SettingsSoundOutputDevice, name)) {
+                        if (ImGui.Selectable(Language.SettingsSoundDefaultDevice)) {
                             this.Plugin.Config.SoundDevice = -1;
                             this.Plugin.Config.Save();
                         }
@@ -269,14 +271,14 @@ namespace PeepingTom {
                     }
 
                     var soundCooldown = this.Plugin.Config.SoundCooldown;
-                    if (ImGui.DragFloat("Cooldown for sound (seconds)", ref soundCooldown, .01f, 0f, 30f)) {
+                    if (ImGui.DragFloat(Language.SettingsSoundCooldown, ref soundCooldown, .01f, 0f, 30f)) {
                         soundCooldown = Math.Max(0f, soundCooldown);
                         this.Plugin.Config.SoundCooldown = soundCooldown;
                         this.Plugin.Config.Save();
                     }
 
                     var playWhenClosed = this.Plugin.Config.PlaySoundWhenClosed;
-                    if (ImGui.Checkbox("Play sound when window is closed", ref playWhenClosed)) {
+                    if (ImGui.Checkbox(Language.SettingsSoundPlayWhenClosed, ref playWhenClosed)) {
                         this.Plugin.Config.PlaySoundWhenClosed = playWhenClosed;
                         this.Plugin.Config.Save();
                     }
@@ -284,21 +286,21 @@ namespace PeepingTom {
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("Window")) {
+                if (ImGui.BeginTabItem(Language.SettingsWindowTab)) {
                     var openOnLogin = this.Plugin.Config.OpenOnLogin;
-                    if (ImGui.Checkbox("Open on login", ref openOnLogin)) {
+                    if (ImGui.Checkbox(Language.SettingsWindowOpenLogin, ref openOnLogin)) {
                         this.Plugin.Config.OpenOnLogin = openOnLogin;
                         this.Plugin.Config.Save();
                     }
 
                     var allowMovement = this.Plugin.Config.AllowMovement;
-                    if (ImGui.Checkbox("Allow moving the main window", ref allowMovement)) {
+                    if (ImGui.Checkbox(Language.SettingsWindowAllowMovement, ref allowMovement)) {
                         this.Plugin.Config.AllowMovement = allowMovement;
                         this.Plugin.Config.Save();
                     }
 
                     var allowResizing = this.Plugin.Config.AllowResize;
-                    if (ImGui.Checkbox("Allow resizing the main window", ref allowResizing)) {
+                    if (ImGui.Checkbox(Language.SettingsWindowAllowResize, ref allowResizing)) {
                         this.Plugin.Config.AllowResize = allowResizing;
                         this.Plugin.Config.Save();
                     }
@@ -306,19 +308,19 @@ namespace PeepingTom {
                     ImGui.Spacing();
 
                     var showInCombat = this.Plugin.Config.ShowInCombat;
-                    if (ImGui.Checkbox("Show window while in combat", ref showInCombat)) {
+                    if (ImGui.Checkbox(Language.SettingsWindowShowCombat, ref showInCombat)) {
                         this.Plugin.Config.ShowInCombat = showInCombat;
                         this.Plugin.Config.Save();
                     }
 
                     var showInInstance = this.Plugin.Config.ShowInInstance;
-                    if (ImGui.Checkbox("Show window while in instance", ref showInInstance)) {
+                    if (ImGui.Checkbox(Language.SettingsWindowShowInstance, ref showInInstance)) {
                         this.Plugin.Config.ShowInInstance = showInInstance;
                         this.Plugin.Config.Save();
                     }
 
                     var showInCutscenes = this.Plugin.Config.ShowInCutscenes;
-                    if (ImGui.Checkbox("Show window while in cutscenes", ref showInCutscenes)) {
+                    if (ImGui.Checkbox(Language.SettingsWindowShowCutscene, ref showInCutscenes)) {
                         this.Plugin.Config.ShowInCutscenes = showInCutscenes;
                         this.Plugin.Config.Save();
                     }
@@ -326,28 +328,28 @@ namespace PeepingTom {
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("History")) {
+                if (ImGui.BeginTabItem(Language.SettingsHistoryTab)) {
                     var keepHistory = this.Plugin.Config.KeepHistory;
-                    if (ImGui.Checkbox("Show previous targeters", ref keepHistory)) {
+                    if (ImGui.Checkbox(Language.SettingsHistoryEnabled, ref keepHistory)) {
                         this.Plugin.Config.KeepHistory = keepHistory;
                         this.Plugin.Config.Save();
                     }
 
                     var historyWhenClosed = this.Plugin.Config.HistoryWhenClosed;
-                    if (ImGui.Checkbox("Record history when window is closed", ref historyWhenClosed)) {
+                    if (ImGui.Checkbox(Language.SettingsHistoryRecordClosed, ref historyWhenClosed)) {
                         this.Plugin.Config.HistoryWhenClosed = historyWhenClosed;
                         this.Plugin.Config.Save();
                     }
 
                     var numHistory = this.Plugin.Config.NumHistory;
-                    if (ImGui.InputInt("Number of previous targeters to keep", ref numHistory)) {
+                    if (ImGui.InputInt(Language.SettingsHistoryAmount, ref numHistory)) {
                         numHistory = Math.Max(0, Math.Min(50, numHistory));
                         this.Plugin.Config.NumHistory = numHistory;
                         this.Plugin.Config.Save();
                     }
 
                     var showTimestamps = this.Plugin.Config.ShowTimestamps;
-                    if (ImGui.Checkbox("Show timestamps", ref showTimestamps)) {
+                    if (ImGui.Checkbox(Language.SettingsHistoryTimestamps, ref showTimestamps)) {
                         this.Plugin.Config.ShowTimestamps = showTimestamps;
                         this.Plugin.Config.Save();
                     }
@@ -355,9 +357,9 @@ namespace PeepingTom {
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("Advanced")) {
+                if (ImGui.BeginTabItem(Language.SettingsAdvancedTab)) {
                     var pollFrequency = this.Plugin.Config.PollFrequency;
-                    if (ImGui.DragInt("Poll frequency in milliseconds", ref pollFrequency, .1f, 1, 1600)) {
+                    if (ImGui.DragInt(Language.SettingsAdvancedPollFrequency, ref pollFrequency, .1f, 1, 1600)) {
                         this.Plugin.Config.PollFrequency = pollFrequency;
                         this.Plugin.Config.Save();
                     }
@@ -365,6 +367,7 @@ namespace PeepingTom {
                     ImGui.EndTabItem();
                 }
 
+                #if DEBUG
                 if (ImGui.BeginTabItem("Debug")) {
                     if (ImGui.Button("Log targeting you")) {
                         var player = this.Plugin.Interface.ClientState.LocalPlayer;
@@ -397,6 +400,7 @@ namespace PeepingTom {
 
                     ImGui.EndTabItem();
                 }
+                #endif
 
                 ImGui.EndTabBar();
             }
@@ -440,9 +444,11 @@ namespace PeepingTom {
             }
 
             {
-                ImGui.Text("Targeting you");
+                ImGui.Text(Language.MainTargetingYou);
                 ImGui.SameLine();
-                HelpMarker(this.Plugin.Config.OpenExamine ? "Click to link, Alt-click to examine, or right click to target." : "Click to link or right click to target.");
+                HelpMarker(this.Plugin.Config.OpenExamine
+                    ? Language.MainHelpExamine
+                    : Language.MainHelpNoExamine);
 
                 var height = ImGui.GetContentRegionAvail().Y;
                 height -= ImGui.GetStyle().ItemSpacing.Y;
@@ -558,10 +564,7 @@ namespace PeepingTom {
                     if (actor != null) {
                         this.Plugin.Common.Functions.Examine.OpenExamineWindow(actor);
                     } else {
-                        var error = new SeString(new Payload[] {
-                            new PlayerPayload(this.Plugin.Interface.Data, targeter.Name, targeter.HomeWorld.Id),
-                            new TextPayload(" is not close enough to examine."),
-                        });
+                        var error = string.Format(Language.ExamineErrorToast, targeter.Name);
                         this.Plugin.Interface.Framework.Gui.Toast.ShowError(error);
                     }
                 } else {

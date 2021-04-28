@@ -12,9 +12,6 @@ namespace PeepingTom {
         public DateTime When { get; }
 
         public Targeter(PlayerCharacter character) {
-            if (character == null) {
-                throw new ArgumentNullException(nameof(character), "PlayerCharacter cannot be null");
-            }
             this.Name = character.Name;
             this.HomeWorld = character.HomeWorld;
             this.ActorId = character.ActorId;
@@ -22,9 +19,6 @@ namespace PeepingTom {
         }
 
         public PlayerCharacter? GetPlayerCharacter(DalamudPluginInterface pi) {
-            if (pi == null) {
-                throw new ArgumentNullException(nameof(pi), "DalamudPluginInterface cannot be null");
-            }
             return pi.ClientState.Actors.FirstOrDefault(actor => actor.ActorId == this.ActorId && actor is PlayerCharacter) as PlayerCharacter;
         }
     }
