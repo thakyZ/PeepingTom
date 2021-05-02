@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
@@ -58,4 +58,139 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="SettingsTitle" xml:space="preserve">
+    <value>Ajustes de {0}</value>
+  </data>
+  <data name="SettingsMarkersTab" xml:space="preserve">
+    <value>Marcadores</value>
+  </data>
+  <data name="SettingsMarkersMarkTarget" xml:space="preserve">
+    <value>Marcar a tu objetivo</value>
+  </data>
+  <data name="SettingsMarkersMarkTargetColour" xml:space="preserve">
+    <value>Color de la marca de objetivo</value>
+  </data>
+  <data name="SettingsMarkersMarkTargeting" xml:space="preserve">
+    <value>Marcar a quien te tenga como objetivo</value>
+  </data>
+  <data name="SettingsMarkersMarkTargetingColour" xml:space="preserve">
+    <value>Color de la marca de objetivo</value>
+  </data>
+  <data name="SettingsMarkersMarkTargetingSize" xml:space="preserve">
+    <value>Tamaño de la marca de objetivo</value>
+  </data>
+  <data name="SettingsFilterTab" xml:space="preserve">
+    <value>Filtros</value>
+  </data>
+  <data name="SettingsFilterLogParty" xml:space="preserve">
+    <value>Registrar a miembros del grupo</value>
+  </data>
+  <data name="SettingsFilterLogCombat" xml:space="preserve">
+    <value>Registrar a aquellos que te seleccionen como objetivo estando en combate</value>
+  </data>
+  <data name="SettingsFilterLogSelf" xml:space="preserve">
+    <value>Registrarte a ti mismo/a</value>
+  </data>
+  <data name="SettingsBehaviourTab" xml:space="preserve">
+    <value>Comportamiento</value>
+  </data>
+  <data name="SettingsBehaviourExamineEnabled" xml:space="preserve">
+    <value>Abrir ventana de examinar al hacer Alt-click</value>
+  </data>
+  <data name="SettingsSoundTab" xml:space="preserve">
+    <value>Sonido</value>
+  </data>
+  <data name="SettingsSoundEnabled" xml:space="preserve">
+    <value>Reproducir sonido cuando te tengan como objetivo</value>
+  </data>
+  <data name="SettingsSoundPath" xml:space="preserve">
+    <value>Ruta al archivo de sonido</value>
+  </data>
+  <data name="SettingsSoundPathHelp" xml:space="preserve">
+    <value>Deja ésto vacío para usar un sonido propio.</value>
+  </data>
+  <data name="SettingsSoundVolume" xml:space="preserve">
+    <value>Volumen del sonido</value>
+  </data>
+  <data name="SettingsSoundDefaultDevice" xml:space="preserve">
+    <value>Predeterminado</value>
+  </data>
+  <data name="SettingsSoundOutputDevice" xml:space="preserve">
+    <value>Dispositivo de salida</value>
+  </data>
+  <data name="SettingsSoundCooldown" xml:space="preserve">
+    <value>Tiempo de espera para el sonido (segundos)</value>
+  </data>
+  <data name="SettingsSoundPlayWhenClosed" xml:space="preserve">
+    <value>Reproducir sonido con la ventana cerrada</value>
+  </data>
+  <data name="SettingsWindowTab" xml:space="preserve">
+    <value>Ventana</value>
+  </data>
+  <data name="SettingsWindowOpenLogin" xml:space="preserve">
+    <value>Abrir al iniciar sesión</value>
+  </data>
+  <data name="SettingsWindowAllowResize" xml:space="preserve">
+    <value>Permitir ajustar el tamaño de la ventana principal</value>
+  </data>
+  <data name="SettingsWindowShowCombat" xml:space="preserve">
+    <value>Mostrar ventana en combate</value>
+  </data>
+  <data name="SettingsWindowShowInstance" xml:space="preserve">
+    <value>Mostrar ventana dentro de instancias</value>
+  </data>
+  <data name="SettingsHistoryTab" xml:space="preserve">
+    <value>Historial</value>
+  </data>
+  <data name="SettingsHistoryEnabled" xml:space="preserve">
+    <value>Mostrar jugadores que te han seleccionado como objetivo anteriormente</value>
+  </data>
+  <data name="SettingsHistoryRecordClosed" xml:space="preserve">
+    <value>Registrar historial con la ventana cerrada</value>
+  </data>
+  <data name="SettingsHistoryAmount" xml:space="preserve">
+    <value>Número de jugadores anteriores a mostrar</value>
+  </data>
+  <data name="SettingsHistoryTimestamps" xml:space="preserve">
+    <value>Mostrar marcas de tiempo</value>
+  </data>
+  <data name="SettingsAdvancedTab" xml:space="preserve">
+    <value>Avanzado</value>
+  </data>
+  <data name="ExamineErrorToast" xml:space="preserve">
+    <value>{0} no está lo suficientemente cerca para poder examinarlo.</value>
+  </data>
+  <data name="MainTargetingYou" xml:space="preserve">
+    <value>Te tienen como objetivo</value>
+  </data>
+  <data name="MainHelpNoExamine" xml:space="preserve">
+    <value>Haz click para enlazar o click derecho para seleccionar como objetivo.</value>
+  </data>
+  <data name="SoundChatError" xml:space="preserve">
+    <value>No se ha podido reproducir archivo de sonido: {0}</value>
+  </data>
+  <data name="SettingsMarkersMarkTargetSize" xml:space="preserve">
+    <value>Tamaño de la marca de objetivo</value>
+  </data>
+  <data name="SettingsFilterLogAlliance" xml:space="preserve">
+    <value>Registrar a miembros de alianzas</value>
+  </data>
+  <data name="SettingsBehaviourFocusHover" xml:space="preserve">
+    <value>Hacer focus target al pasar el ratón por encima</value>
+  </data>
+  <data name="SettingsSoundInvalidDevice" xml:space="preserve">
+    <value>Dispositivo inválido</value>
+  </data>
+  <data name="SettingsWindowAllowMovement" xml:space="preserve">
+    <value>Permitir mover la ventana principal</value>
+  </data>
+  <data name="SettingsWindowShowCutscene" xml:space="preserve">
+    <value>Mostrar ventana durante escenas de vídeo</value>
+  </data>
+  <data name="SettingsAdvancedPollFrequency" xml:space="preserve">
+    <value>Frecuencia de consulta en milisegundos</value>
+  </data>
+  <data name="MainHelpExamine" xml:space="preserve">
+    <value>Haz click para enlazar, Alt-click para examinar, o click derecho para seleccionar como objetivo.</value>
+  </data>
 </root>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
@@ -58,4 +58,139 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="SettingsHistoryEnabled" xml:space="preserve">
+    <value>Montrer les personnes vous ayant précédemment ciblé·e</value>
+  </data>
+  <data name="SettingsAdvancedPollFrequency" xml:space="preserve">
+    <value>Fréquence de surveillance en millisecondes</value>
+  </data>
+  <data name="MainHelpExamine" xml:space="preserve">
+    <value>Clic gauche pour créer un lien de joueur, Alt + Clic gauche pour examiner, ou clic droit pour cibler.</value>
+  </data>
+  <data name="SettingsMarkersTab" xml:space="preserve">
+    <value>Marqueurs</value>
+  </data>
+  <data name="SettingsMarkersMarkTarget" xml:space="preserve">
+    <value>Marquer votre cible</value>
+  </data>
+  <data name="SettingsMarkersMarkTargetSize" xml:space="preserve">
+    <value>Taille de la marque sur votre cible</value>
+  </data>
+  <data name="SettingsMarkersMarkTargeting" xml:space="preserve">
+    <value>Marquer ceux qui vous ciblent</value>
+  </data>
+  <data name="SettingsMarkersMarkTargetingColour" xml:space="preserve">
+    <value>Couleur de la marque sur ceux qui vous ciblent</value>
+  </data>
+  <data name="SettingsMarkersMarkTargetingSize" xml:space="preserve">
+    <value>Taille de la marque sur ceux qui vous ciblent</value>
+  </data>
+  <data name="SettingsFilterTab" xml:space="preserve">
+    <value>Filtres</value>
+  </data>
+  <data name="SettingsFilterLogParty" xml:space="preserve">
+    <value>Historiser les membres de l'équipe</value>
+  </data>
+  <data name="SettingsFilterLogCombat" xml:space="preserve">
+    <value>Historiser ceux qui vous ciblent durant les combats</value>
+  </data>
+  <data name="SettingsFilterLogSelf" xml:space="preserve">
+    <value>Vous historiser vous-même</value>
+  </data>
+  <data name="SettingsBehaviourTab" xml:space="preserve">
+    <value>Comportement</value>
+  </data>
+  <data name="SettingsBehaviourFocusHover" xml:space="preserve">
+    <value>Mettre la cible en cible focalisée au survol</value>
+  </data>
+  <data name="SettingsSoundTab" xml:space="preserve">
+    <value>Son</value>
+  </data>
+  <data name="SettingsSoundEnabled" xml:space="preserve">
+    <value>Jouer un son quand vous êtes ciblé·e</value>
+  </data>
+  <data name="SettingsSoundPath" xml:space="preserve">
+    <value>Chemin vers le fichier audio</value>
+  </data>
+  <data name="SettingsSoundPathHelp" xml:space="preserve">
+    <value>Laissez ce champ vide pour utiliser le son par défaut.</value>
+  </data>
+  <data name="SettingsSoundVolume" xml:space="preserve">
+    <value>Volume du son</value>
+  </data>
+  <data name="SettingsSoundDefaultDevice" xml:space="preserve">
+    <value>Défaut</value>
+  </data>
+  <data name="SettingsSoundInvalidDevice" xml:space="preserve">
+    <value>Sortie son invalide</value>
+  </data>
+  <data name="SettingsSoundOutputDevice" xml:space="preserve">
+    <value>Sortie son</value>
+  </data>
+  <data name="SettingsSoundPlayWhenClosed" xml:space="preserve">
+    <value>Jouer un son quand la fenêtre est fermée</value>
+  </data>
+  <data name="SettingsWindowTab" xml:space="preserve">
+    <value>Fenêtre</value>
+  </data>
+  <data name="SettingsWindowOpenLogin" xml:space="preserve">
+    <value>Ouvrir à la connexion</value>
+  </data>
+  <data name="SettingsWindowAllowMovement" xml:space="preserve">
+    <value>Permettre le déplacement de la fenêtre principale</value>
+  </data>
+  <data name="SettingsWindowShowCombat" xml:space="preserve">
+    <value>Montrer la fenêtre principale pendant les combats</value>
+  </data>
+  <data name="SettingsWindowShowInstance" xml:space="preserve">
+    <value>Montrer la fenêtre principale dans les instances</value>
+  </data>
+  <data name="SettingsWindowShowCutscene" xml:space="preserve">
+    <value>Montrer la fenêtre principale pendant les cinématiques</value>
+  </data>
+  <data name="SettingsHistoryTab" xml:space="preserve">
+    <value>Historique</value>
+  </data>
+  <data name="SettingsHistoryRecordClosed" xml:space="preserve">
+    <value>Historiser lorsque la fenêtre est fermée</value>
+  </data>
+  <data name="SettingsHistoryAmount" xml:space="preserve">
+    <value>Nombre de personnes vous ayant ciblé·e à conserver dans l'historique</value>
+  </data>
+  <data name="SettingsHistoryTimestamps" xml:space="preserve">
+    <value>Montrer l'heure</value>
+  </data>
+  <data name="SettingsAdvancedTab" xml:space="preserve">
+    <value>Avancé</value>
+  </data>
+  <data name="ExamineErrorToast" xml:space="preserve">
+    <value>{0} n'est pas assez près de vous pour que vous puissiez l'examiner.</value>
+  </data>
+  <data name="MainTargetingYou" xml:space="preserve">
+    <value>En train de vous cibler</value>
+  </data>
+  <data name="MainHelpNoExamine" xml:space="preserve">
+    <value>Clic gauche pour créer un lien de joueur ou clic droit pour cibler.</value>
+  </data>
+  <data name="SoundChatError" xml:space="preserve">
+    <value>Impossible de jouer le fichier audio : {0}</value>
+  </data>
+  <data name="SettingsTitle" xml:space="preserve">
+    <value>Paramètres de {0}</value>
+  </data>
+  <data name="SettingsMarkersMarkTargetColour" xml:space="preserve">
+    <value>Couleur de la marque sur votre cible</value>
+  </data>
+  <data name="SettingsFilterLogAlliance" xml:space="preserve">
+    <value>Historiser les membres de l'alliance</value>
+  </data>
+  <data name="SettingsBehaviourExamineEnabled" xml:space="preserve">
+    <value>Ouvrir la fenêtre d'examination avec Alt+Clic gauche</value>
+  </data>
+  <data name="SettingsSoundCooldown" xml:space="preserve">
+    <value>Cooldown pour le son (en secondes)</value>
+  </data>
+  <data name="SettingsWindowAllowResize" xml:space="preserve">
+    <value>Permettre le redimensionnement de la fenêtre principale</value>
+  </data>
 </root>
