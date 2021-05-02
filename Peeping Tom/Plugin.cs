@@ -28,7 +28,6 @@ namespace PeepingTom {
             this.Watcher = new TargetWatcher(this);
             this.Ui = new PluginUi(this);
 
-            Util.PreLoadResourcesFromMainAssembly("PeepingTom.Resources.Language.");
             OnLanguageChange(this.Interface.UiLanguage);
             this.Interface.OnLanguageChanged += OnLanguageChange;
 
