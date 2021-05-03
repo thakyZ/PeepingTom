@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
@@ -58,4 +58,139 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="SettingsAdvancedPollFrequency" xml:space="preserve">
+    <value>ポーリングの頻度(ミリ秒)</value>
+  </data>
+  <data name="MainHelpExamine" xml:space="preserve">
+    <value>クリックするとチャットログに対象のリンクを、Alt+クリックで調べるを、右クリックでターゲットします。</value>
+  </data>
+  <data name="SettingsMarkersTab" xml:space="preserve">
+    <value>マーカー</value>
+  </data>
+  <data name="SettingsMarkersMarkTarget" xml:space="preserve">
+    <value>あなたのターゲットをマーク</value>
+  </data>
+  <data name="SettingsMarkersMarkTargetSize" xml:space="preserve">
+    <value>ターゲットマークのサイズ</value>
+  </data>
+  <data name="SettingsMarkersMarkTargetingColour" xml:space="preserve">
+    <value>ターゲットマークの色</value>
+  </data>
+  <data name="SettingsMarkersMarkTargeting" xml:space="preserve">
+    <value>あなたをターゲット中のプレイヤーをマーク</value>
+  </data>
+  <data name="SettingsFilterTab" xml:space="preserve">
+    <value>フィルタ</value>
+  </data>
+  <data name="SettingsFilterLogParty" xml:space="preserve">
+    <value>パーティメンバーのログを有効化</value>
+  </data>
+  <data name="SettingsFilterLogAlliance" xml:space="preserve">
+    <value>アライアンスメンバーのログを有効化</value>
+  </data>
+  <data name="SettingsFilterLogSelf" xml:space="preserve">
+    <value>あなた自身のログを有効化</value>
+  </data>
+  <data name="SettingsSoundTab" xml:space="preserve">
+    <value>サウンド</value>
+  </data>
+  <data name="SettingsSoundEnabled" xml:space="preserve">
+    <value>ターゲットされたら音を鳴らす</value>
+  </data>
+  <data name="SettingsSoundPathHelp" xml:space="preserve">
+    <value>内蔵のサウンドを使用する場合は、この項目を空白にします。</value>
+  </data>
+  <data name="SettingsSoundVolume" xml:space="preserve">
+    <value>音の大きさ</value>
+  </data>
+  <data name="SettingsSoundDefaultDevice" xml:space="preserve">
+    <value>デフォルト</value>
+  </data>
+  <data name="SettingsSoundInvalidDevice" xml:space="preserve">
+    <value>無効なデバイス</value>
+  </data>
+  <data name="SettingsSoundCooldown" xml:space="preserve">
+    <value>サウンドのクールダウン(秒)</value>
+  </data>
+  <data name="SettingsWindowTab" xml:space="preserve">
+    <value>ウィンドウ</value>
+  </data>
+  <data name="SettingsWindowOpenLogin" xml:space="preserve">
+    <value>ログイン時に開く</value>
+  </data>
+  <data name="SettingsWindowAllowMovement" xml:space="preserve">
+    <value>メインウィンドウの移動を許可</value>
+  </data>
+  <data name="SettingsWindowAllowResize" xml:space="preserve">
+    <value>メインウィンドウのリサイズを許可</value>
+  </data>
+  <data name="SettingsWindowShowCombat" xml:space="preserve">
+    <value>戦闘中にウィンドウを表示</value>
+  </data>
+  <data name="SettingsWindowShowInstance" xml:space="preserve">
+    <value>インスタンス中にウィンドウを表示</value>
+  </data>
+  <data name="SettingsHistoryTab" xml:space="preserve">
+    <value>履歴</value>
+  </data>
+  <data name="SettingsHistoryEnabled" xml:space="preserve">
+    <value>過去のターゲットを表示</value>
+  </data>
+  <data name="SettingsHistoryRecordClosed" xml:space="preserve">
+    <value>ウィンドウを閉じていても履歴を記録</value>
+  </data>
+  <data name="SettingsHistoryAmount" xml:space="preserve">
+    <value>保持する過去のターゲット数</value>
+  </data>
+  <data name="SettingsHistoryTimestamps" xml:space="preserve">
+    <value>タイムスタンプを表示</value>
+  </data>
+  <data name="SettingsAdvancedTab" xml:space="preserve">
+    <value>高度な設定</value>
+  </data>
+  <data name="ExamineErrorToast" xml:space="preserve">
+    <value>{0}を調査するには遠いです。</value>
+  </data>
+  <data name="MainTargetingYou" xml:space="preserve">
+    <value>あなたをターゲット中</value>
+  </data>
+  <data name="SettingsBehaviourExamineEnabled" xml:space="preserve">
+    <value>Alt+クリックで調べるウィンドウを開く</value>
+  </data>
+  <data name="SettingsBehaviourFocusHover" xml:space="preserve">
+    <value>ホバー時に対象をターゲットフォーカス</value>
+  </data>
+  <data name="SettingsBehaviourTab" xml:space="preserve">
+    <value>動作</value>
+  </data>
+  <data name="MainHelpNoExamine" xml:space="preserve">
+    <value>クリックするとチャットログに対象のリンクを、右クリックでターゲットします。</value>
+  </data>
+  <data name="SoundChatError" xml:space="preserve">
+    <value>音声ファイルが再生できませんでした: {0}</value>
+  </data>
+  <data name="SettingsTitle" xml:space="preserve">
+    <value>{0} 設定</value>
+  </data>
+  <data name="SettingsMarkersMarkTargetColour" xml:space="preserve">
+    <value>ターゲットマークの色</value>
+  </data>
+  <data name="SettingsMarkersMarkTargetingSize" xml:space="preserve">
+    <value>ターゲットマークのサイズ</value>
+  </data>
+  <data name="SettingsFilterLogCombat" xml:space="preserve">
+    <value>戦闘中のプレイヤーのログを有効化</value>
+  </data>
+  <data name="SettingsSoundPath" xml:space="preserve">
+    <value>音声ファイルのパス</value>
+  </data>
+  <data name="SettingsSoundOutputDevice" xml:space="preserve">
+    <value>出力デバイス</value>
+  </data>
+  <data name="SettingsSoundPlayWhenClosed" xml:space="preserve">
+    <value>ウィンドウを閉じていても音を鳴らす</value>
+  </data>
+  <data name="SettingsWindowShowCutscene" xml:space="preserve">
+    <value>カットシーン中にウィンドウを表示</value>
+  </data>
 </root>
