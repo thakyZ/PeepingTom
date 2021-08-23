@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Peeping Tom", "Peeping Tom\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9B879446-A687-4B9D-8628-807CCB8C51AE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Peeping Tom.Ipc", "Peeping Tom.Ipc\Peeping Tom.Ipc.csproj", "{F454FB15-2C11-44F3-A651-E5F912F0FE11}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,6 +19,10 @@ Global
 		{888F98DF-AF1D-4852-8411-11B1FEEFE674}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{888F98DF-AF1D-4852-8411-11B1FEEFE674}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{888F98DF-AF1D-4852-8411-11B1FEEFE674}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F454FB15-2C11-44F3-A651-E5F912F0FE11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F454FB15-2C11-44F3-A651-E5F912F0FE11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F454FB15-2C11-44F3-A651-E5F912F0FE11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F454FB15-2C11-44F3-A651-E5F912F0FE11}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

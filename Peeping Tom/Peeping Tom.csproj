@@ -1,13 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net48</TargetFramework>
+        <TargetFramework>net5-windows</TargetFramework>
         <RootNamespace>PeepingTom</RootNamespace>
         <Version>1.7.5</Version>
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
         <AssemblyName>PeepingTom</AssemblyName>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     </PropertyGroup>
     <ItemGroup>
         <EmbeddedResource Include="Resources\target.wav"/>
@@ -37,19 +39,16 @@
             <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Lumina.Excel.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="SharpDX.Mathematics">
-            <HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\SharpDX.Mathematics.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="DalamudPackager" Version="1.2.1"/>
-        <PackageReference Include="Fody" Version="6.5.1" PrivateAssets="all"/>
-        <PackageReference Include="ILMerge.Fody" Version="1.16.0" PrivateAssets="all"/>
-        <PackageReference Include="NAudio" Version="2.0.0"/>
+        <PackageReference Include="DalamudPackager" Version="2.1.2"/>
+        <PackageReference Include="Fody" Version="6.5.2" PrivateAssets="all"/>
+        <PackageReference Include="NAudio" Version="2.0.1"/>
         <PackageReference Include="Resourcer.Fody" Version="1.8.0" PrivateAssets="all"/>
-        <PackageReference Include="ResourcesMerge.Fody" Version="1.0.1" PrivateAssets="all"/>
-        <PackageReference Include="XivCommon" Version="1.5.0"/>
+        <PackageReference Include="XivCommon" Version="3.0.1"/>
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Peeping Tom.Ipc\Peeping Tom.Ipc.csproj"/>
     </ItemGroup>
     <ItemGroup>
         <Compile Update="Resources\Language.Designer.cs">
@@ -57,5 +56,8 @@
             <AutoGen>True</AutoGen>
             <DependentUpon>Language.resx</DependentUpon>
         </Compile>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="..\icon.png" Link="images/icon.png" CopyToOutputDirectory="PreserveNewest" Visible="false"/>
     </ItemGroup>
 </Project>

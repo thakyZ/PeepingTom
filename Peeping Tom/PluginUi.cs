@@ -1,22 +1,25 @@
-﻿using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Actors.Types;
-using ImGuiNET;
+﻿using ImGuiNET;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface;
+using PeepingTom.Ipc;
 using PeepingTom.Resources;
 
 namespace PeepingTom {
     internal class PluginUi : IDisposable {
         private PeepingTomPlugin Plugin { get; }
 
-        private Optional<Actor> PreviousFocus { get; set; } = new();
+        private uint? PreviousFocus { get; set; } = new();
 
         private bool _wantsOpen;
 
@@ -52,13 +55,13 @@ namespace PeepingTom {
                 this.ShowSettings();
             }
 
-            var inCombat = this.Plugin.Interface.ClientState.Condition[ConditionFlag.InCombat];
-            var inInstance = this.Plugin.Interface.ClientState.Condition[ConditionFlag.BoundByDuty]
-                             || this.Plugin.Interface.ClientState.Condition[ConditionFlag.BoundByDuty56]
-                             || this.Plugin.Interface.ClientState.Condition[ConditionFlag.BoundByDuty95];
-            var inCutscene = this.Plugin.Interface.ClientState.Condition[ConditionFlag.WatchingCutscene]
-                             || this.Plugin.Interface.ClientState.Condition[ConditionFlag.WatchingCutscene78]
-                             || this.Plugin.Interface.ClientState.Condition[ConditionFlag.OccupiedInCutSceneEvent];
+            var inCombat = this.Plugin.Condition[ConditionFlag.InCombat];
+            var inInstance = this.Plugin.Condition[ConditionFlag.BoundByDuty]
+                             || this.Plugin.Condition[ConditionFlag.BoundByDuty56]
+                             || this.Plugin.Condition[ConditionFlag.BoundByDuty95];
+            var inCutscene = this.Plugin.Condition[ConditionFlag.WatchingCutscene]
+                             || this.Plugin.Condition[ConditionFlag.WatchingCutscene78]
+                             || this.Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent];
 
             // FIXME: this could just be a boolean expression
             var shouldBeShown = this.WantsOpen;
@@ -101,13 +104,13 @@ namespace PeepingTom {
                 goto EndDummy;
             }
 
-            var player = this.Plugin.Interface.ClientState.LocalPlayer;
+            var player = this.Plugin.ClientState.LocalPlayer;
             if (player == null) {
                 goto EndDummy;
             }
 
             var targeting = this.Plugin.Watcher.CurrentTargeters
-                .Select(targeter => this.Plugin.Interface.ClientState.Actors.FirstOrDefault(actor => actor.ActorId == targeter.ActorId))
+                .Select(targeter => this.Plugin.ObjectTable.FirstOrDefault(obj => obj.ObjectId == targeter.ObjectId))
                 .Where(targeter => targeter is PlayerCharacter)
                 .Cast<PlayerCharacter>()
                 .ToArray();
@@ -377,10 +380,10 @@ namespace PeepingTom {
                                 .Where(actor => actor.TargetActorID == player.ActorId && actor is PlayerCharacter)
                                 .Cast<PlayerCharacter>();
                             foreach (var actor in actors) {
-                                var payload = new PlayerPayload(this.Plugin.Interface.Data, actor.Name, actor.HomeWorld.Id);
+                                var payload = new PlayerPayload(this.Plugin.Interface.Data, actor.Name.TextValue, actor.HomeWorld.Id);
                                 Payload[] payloads = {payload};
                                 this.Plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
-                                    MessageBytes = new SeString(payloads).Encode(),
+                                    Message = new SeString(payloads),
                                 });
                             }
                         }
@@ -390,10 +393,10 @@ namespace PeepingTom {
                         var target = this.GetCurrentTarget();
 
                         if (target != null) {
-                            var payload = new PlayerPayload(this.Plugin.Interface.Data, target.Name, target.HomeWorld.Id);
+                            var payload = new PlayerPayload(this.Plugin.Interface.Data, target.Name.TextValue, target.HomeWorld.Id);
                             Payload[] payloads = {payload};
                             this.Plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
-                                MessageBytes = new SeString(payloads).Encode(),
+                                Message = new SeString(payloads),
                             });
                         }
                     }
@@ -414,18 +417,18 @@ namespace PeepingTom {
 
             // to prevent looping over a subset of the actors repeatedly when multiple people are targeting,
             // create a dictionary for O(1) lookups by actor id
-            Dictionary<int, Actor>? actors = null;
+            Dictionary<uint, GameObject>? objects = null;
             if (targeting.Count + (previousTargeters?.Count ?? 0) > 1) {
-                var dict = new Dictionary<int, Actor>();
-                foreach (var actor in this.Plugin.Interface.ClientState.Actors) {
-                    if (dict.ContainsKey(actor.ActorId) || actor.ObjectKind != Dalamud.Game.ClientState.Actors.ObjectKind.Player) {
+                var dict = new Dictionary<uint, GameObject>();
+                foreach (var obj in this.Plugin.ObjectTable) {
+                    if (dict.ContainsKey(obj.ObjectId) || obj.ObjectKind != ObjectKind.Player) {
                         continue;
                     }
 
-                    dict.Add(actor.ActorId, actor);
+                    dict.Add(obj.ObjectId, obj);
                 }
 
-                actors = dict;
+                objects = dict;
             }
 
             var flags = ImGuiWindowFlags.None;
@@ -465,37 +468,38 @@ namespace PeepingTom {
                     // }
 
                     foreach (var targeter in targeting) {
-                        Actor? actor = null;
-                        actors?.TryGetValue(targeter.ActorId, out actor);
-                        this.AddEntry(targeter, actor, ref anyHovered);
+                        GameObject? obj = null;
+                        objects?.TryGetValue(targeter.ObjectId, out obj);
+                        this.AddEntry(targeter, obj, ref anyHovered);
                     }
 
                     if (this.Plugin.Config.KeepHistory) {
                         // get a list of the previous targeters that aren't currently targeting
                         var previous = (previousTargeters ?? new List<Targeter>())
-                            .Where(old => targeting.All(actor => actor.ActorId != old.ActorId))
+                            .Where(old => targeting.All(actor => actor.ObjectId != old.ObjectId))
                             .Take(this.Plugin.Config.NumHistory);
                         // add previous targeters to the list
                         foreach (var oldTargeter in previous) {
-                            Actor? actor = null;
-                            actors?.TryGetValue(oldTargeter.ActorId, out actor);
-                            this.AddEntry(oldTargeter, actor, ref anyHovered, ImGuiSelectableFlags.Disabled);
+                            GameObject? obj = null;
+                            objects?.TryGetValue(oldTargeter.ObjectId, out obj);
+                            this.AddEntry(oldTargeter, obj, ref anyHovered, ImGuiSelectableFlags.Disabled);
                         }
                     }
 
                     ImGui.EndListBox();
                 }
 
-                if (this.Plugin.Config.FocusTargetOnHover && !anyHovered && this.PreviousFocus.Get(out var previousFocus)) {
-                    if (previousFocus == null) {
-                        this.Plugin.Interface.ClientState.Targets.SetFocusTarget(null);
+                var previousFocus = this.PreviousFocus;
+                if (this.Plugin.Config.FocusTargetOnHover && !anyHovered && previousFocus != null) {
+                    if (previousFocus == uint.MaxValue) {
+                        this.Plugin.TargetManager.FocusTarget = null;
                     } else {
-                        var actor = this.Plugin.Interface.ClientState.Actors.FirstOrDefault(a => a.ActorId == previousFocus.ActorId);
+                        var actor = this.Plugin.ObjectTable.FirstOrDefault(a => a.ObjectId == previousFocus);
                         // either target the actor if still present or target nothing
-                        this.Plugin.Interface.ClientState.Targets.SetFocusTarget(actor);
+                        this.Plugin.TargetManager.FocusTarget = actor;
                     }
 
-                    this.PreviousFocus = new Optional<Actor>();
+                    this.PreviousFocus = null;
                 }
 
                 ImGui.End();
@@ -515,10 +519,10 @@ namespace PeepingTom {
             ImGui.EndTooltip();
         }
 
-        private void AddEntry(Targeter targeter, Actor? actor, ref bool anyHovered, ImGuiSelectableFlags flags = ImGuiSelectableFlags.None) {
+        private void AddEntry(Targeter targeter, GameObject? obj, ref bool anyHovered, ImGuiSelectableFlags flags = ImGuiSelectableFlags.None) {
             ImGui.BeginGroup();
 
-            ImGui.Selectable(targeter.Name, false, flags);
+            ImGui.Selectable(targeter.Name.TextValue, false, flags);
 
             if (this.Plugin.Config.ShowTimestamps) {
                 var time = DateTime.UtcNow - targeter.When >= TimeSpan.FromDays(1)
@@ -543,48 +547,44 @@ namespace PeepingTom {
             var left = hover && ImGui.IsMouseClicked(ImGuiMouseButton.Left);
             var right = hover && ImGui.IsMouseClicked(ImGuiMouseButton.Right);
 
-            actor ??= this.Plugin.Interface.ClientState.Actors
-                .FirstOrDefault(a => a.ActorId == targeter.ActorId);
+            obj ??= this.Plugin.ObjectTable.FirstOrDefault(a => a.ObjectId == targeter.ObjectId);
 
             // don't count as hovered if the actor isn't here (clears focus target when hovering missing actors)
-            if (actor != null) {
+            if (obj != null) {
                 anyHovered |= hover;
             }
 
-            if (this.Plugin.Config.FocusTargetOnHover && hover && actor != null) {
-                if (!this.PreviousFocus.Present) {
-                    this.PreviousFocus = new Optional<Actor>(this.Plugin.Interface.ClientState.Targets.FocusTarget);
-                }
-
-                this.Plugin.Interface.ClientState.Targets.SetFocusTarget(actor);
+            if (this.Plugin.Config.FocusTargetOnHover && hover && obj != null) {
+                this.PreviousFocus ??= this.Plugin.TargetManager.FocusTarget?.ObjectId ?? uint.MaxValue;
+                this.Plugin.TargetManager.FocusTarget = obj;
             }
 
             if (left) {
                 if (this.Plugin.Config.OpenExamine && ImGui.GetIO().KeyAlt) {
-                    if (actor != null) {
-                        this.Plugin.Common.Functions.Examine.OpenExamineWindow(actor);
+                    if (obj != null) {
+                        this.Plugin.Common.Functions.Examine.OpenExamineWindow(obj);
                     } else {
                         var error = string.Format(Language.ExamineErrorToast, targeter.Name);
-                        this.Plugin.Interface.Framework.Gui.Toast.ShowError(error);
+                        this.Plugin.ToastGui.ShowError(error);
                     }
                 } else {
-                    var payload = new PlayerPayload(this.Plugin.Interface.Data, targeter.Name, targeter.HomeWorld.Id);
-                    Payload[] payloads = {payload};
-                    this.Plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
-                        MessageBytes = new SeString(payloads).Encode(),
+                    var payload = new PlayerPayload(targeter.Name.TextValue, targeter.HomeWorldId);
+                    Payload[] payloads = { payload };
+                    this.Plugin.ChatGui.PrintChat(new XivChatEntry {
+                        Message = new SeString(payloads),
                     });
                 }
-            } else if (right && actor != null) {
-                this.Plugin.Interface.ClientState.Targets.SetCurrentTarget(actor);
+            } else if (right && obj != null) {
+                this.Plugin.TargetManager.Target = obj;
             }
         }
 
-        private void MarkPlayer(Actor? player, Vector4 colour, float size) {
+        private void MarkPlayer(GameObject? player, Vector4 colour, float size) {
             if (player == null) {
                 return;
             }
 
-            if (!this.Plugin.Interface.Framework.Gui.WorldToScreen(player.Position, out var screenPos)) {
+            if (!this.Plugin.GameGui.WorldToScreen(player.Position, out var screenPos)) {
                 return;
             }
 
@@ -601,18 +601,18 @@ namespace PeepingTom {
         }
 
         private PlayerCharacter? GetCurrentTarget() {
-            var player = this.Plugin.Interface.ClientState.LocalPlayer;
+            var player = this.Plugin.ClientState.LocalPlayer;
             if (player == null) {
                 return null;
             }
 
-            var targetId = player.TargetActorID;
+            var targetId = player.TargetObjectId;
             if (targetId <= 0) {
                 return null;
             }
 
-            return this.Plugin.Interface.ClientState.Actors
-                .Where(actor => actor.ActorId == targetId && actor is PlayerCharacter)
+            return this.Plugin.ObjectTable
+                .Where(actor => actor.ObjectId == targetId && actor is PlayerCharacter)
                 .Select(actor => actor as PlayerCharacter)
                 .FirstOrDefault();
         }

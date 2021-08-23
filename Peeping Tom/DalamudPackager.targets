@@ -4,7 +4,6 @@
                          OutputPath="$(OutputPath)"
                          AssemblyName="$(AssemblyName)"
                          VersionComponents="3"
-                         Include="PeepingTom.dll;PeepingTom.json;PeepingTom.pdb"
                          MakeZip="true"/>
     </Target>
 </Project>

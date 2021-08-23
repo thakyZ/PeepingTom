@@ -1,7 +1,4 @@
-﻿using Dalamud.Game.ClientState.Actors.Types;
-using Dalamud.Game.Internal;
-using Dalamud.Plugin;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using Resourcer;
 using System;
 using System.Collections.Generic;
@@ -9,110 +6,78 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Dalamud.Game;
+using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text;
-using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
+using PeepingTom.Ipc;
 using PeepingTom.Resources;
 
 namespace PeepingTom {
     internal class TargetWatcher : IDisposable {
         private PeepingTomPlugin Plugin { get; }
 
-        private Stopwatch? Watch { get; set; }
+        private Stopwatch UpdateWatch { get; } = new();
+        private Stopwatch? SoundWatch { get; set; }
         private int LastTargetAmount { get; set; }
 
-        private volatile bool _stop;
-        private volatile bool _needsUpdate = true;
-        private Thread? Thread { get; set; }
-
-        private readonly object _dataMutex = new();
-        private TargetThreadData? Data { get; set; }
-
-        private readonly Mutex _currentMutex = new();
         private Targeter[] Current { get; set; } = Array.Empty<Targeter>();
 
-        public IReadOnlyCollection<Targeter> CurrentTargeters {
-            get {
-                this._currentMutex.WaitOne();
-                var current = this.Current.ToArray();
-                this._currentMutex.ReleaseMutex();
-                return current;
-            }
-        }
+        public IReadOnlyCollection<Targeter> CurrentTargeters => this.Current;
 
-        private readonly Mutex _previousMutex = new();
         private List<Targeter> Previous { get; } = new();
 
-        public IReadOnlyCollection<Targeter> PreviousTargeters {
-            get {
-                this._previousMutex.WaitOne();
-                var previous = this.Previous.ToArray();
-                this._previousMutex.ReleaseMutex();
-                return previous;
-            }
-        }
+        public IReadOnlyCollection<Targeter> PreviousTargeters => this.Previous;
 
         public TargetWatcher(PeepingTomPlugin plugin) {
             this.Plugin = plugin;
+            this.UpdateWatch.Start();
+
+            this.Plugin.Framework.Update += this.OnFrameworkUpdate;
+        }
+
+        public void Dispose() {
+            this.Plugin.Framework.Update -= this.OnFrameworkUpdate;
         }
 
         public void ClearPrevious() {
-            this._previousMutex.WaitOne();
             this.Previous.Clear();
-            this._previousMutex.ReleaseMutex();
         }
 
-        public void StartThread() {
-            this.Thread = new Thread(() => {
-                while (!this._stop) {
-                    this.Update();
-                    this._needsUpdate = true;
-                    Thread.Sleep(this.Plugin.Config.PollFrequency);
-                }
-            });
-            this.Thread.Start();
-        }
-
-        public void WaitStopThread() {
-            this._stop = true;
-            this.Thread?.Join();
-        }
-
-        public void OnFrameworkUpdate(Framework framework) {
-            if (!this._needsUpdate || this.Plugin.InPvp) {
+        private void OnFrameworkUpdate(Framework framework) {
+            if (this.Plugin.InPvp) {
                 return;
             }
 
-            lock (this._dataMutex) {
-                this.Data = new TargetThreadData(this.Plugin.Interface);
+            if (this.UpdateWatch.Elapsed > TimeSpan.FromMilliseconds(this.Plugin.Config.PollFrequency)) {
+                this.Update();
             }
-
-            this._needsUpdate = false;
         }
 
         private void Update() {
-            lock (this._dataMutex) {
-                var player = this.Data?.LocalPlayer;
-                if (player == null) {
-                    return;
-                }
-
-                // block until lease
-                this._currentMutex.WaitOne();
-
-                // get targeters and set a copy so we can release the mutex faster
-                var current = this.GetTargeting(this.Data!.Actors, player);
-                this.Current = (Targeter[]) current.Clone();
-
-                // release
-                this._currentMutex.ReleaseMutex();
+            var player = this.Plugin.ClientState.LocalPlayer;
+            if (player == null) {
+                return;
             }
+
+            // get targeters and set a copy so we can release the mutex faster
+            var newCurrent = this.GetTargeting(this.Plugin.ObjectTable, player);
+
+            foreach (var newTargeter in newCurrent.Where(t => this.Current.All(c => c.ObjectId != t.ObjectId))) {
+                this.Plugin.IpcManager.SendNewTargeter(newTargeter);
+            }
+
+            foreach (var stopped in this.Current.Where(t => newCurrent.All(c => c.ObjectId != t.ObjectId))) {
+                this.Plugin.IpcManager.SendStoppedTargeting(stopped);
+            }
+
+            this.Current = newCurrent;
 
             this.HandleHistory(this.Current);
 
             // play sound if necessary
             if (this.CanPlaySound()) {
-                this.Watch?.Restart();
+                this.SoundWatch?.Restart();
                 this.PlaySound();
             }
 
@@ -124,47 +89,44 @@ namespace PeepingTom {
                 return;
             }
 
-            this._previousMutex.WaitOne();
-
             foreach (var targeter in targeting) {
                 // add the targeter to the previous list
-                if (this.Previous.Any(old => old.ActorId == targeter.ActorId)) {
-                    this.Previous.RemoveAll(old => old.ActorId == targeter.ActorId);
+                if (this.Previous.Any(old => old.ObjectId == targeter.ObjectId)) {
+                    this.Previous.RemoveAll(old => old.ObjectId == targeter.ObjectId);
                 }
 
                 this.Previous.Insert(0, targeter);
             }
 
             // only keep the configured number of previous targeters (ignoring ones that are currently targeting)
-            while (this.Previous.Count(old => targeting.All(actor => actor.ActorId != old.ActorId)) > this.Plugin.Config.NumHistory) {
+            while (this.Previous.Count(old => targeting.All(actor => actor.ObjectId != old.ObjectId)) > this.Plugin.Config.NumHistory) {
                 this.Previous.RemoveAt(this.Previous.Count - 1);
             }
-
-            this._previousMutex.ReleaseMutex();
         }
 
-        private Targeter[] GetTargeting(IEnumerable<Actor> actors, Actor player) {
-            return actors
-                .Where(actor => actor.TargetActorID == player.ActorId && actor is PlayerCharacter)
+        private Targeter[] GetTargeting(IEnumerable<GameObject> objects, GameObject player) {
+            return objects
+                .Where(obj => obj.TargetObjectId == player.ObjectId && obj is PlayerCharacter)
+                // .Where(obj => Marshal.ReadByte(obj.Address + ActorOffsets.PlayerCharacterTargetActorId + 4) == 0)
                 .Cast<PlayerCharacter>()
                 .Where(actor => this.Plugin.Config.LogParty || !InParty(actor))
                 .Where(actor => this.Plugin.Config.LogAlliance || !InAlliance(actor))
                 .Where(actor => this.Plugin.Config.LogInCombat || !InCombat(actor))
-                .Where(actor => this.Plugin.Config.LogSelf || actor.ActorId != player.ActorId)
+                .Where(actor => this.Plugin.Config.LogSelf || actor.ObjectId != player.ObjectId)
                 .Select(actor => new Targeter(actor))
                 .ToArray();
         }
 
-        private static byte GetStatus(Actor actor) {
+        private static byte GetStatus(GameObject actor) {
             var statusPtr = actor.Address + 0x1980; // updated 5.4
             return Marshal.ReadByte(statusPtr);
         }
 
-        private static bool InCombat(Actor actor) => (GetStatus(actor) & 2) > 0;
+        private static bool InCombat(GameObject actor) => (GetStatus(actor) & 2) > 0;
 
-        private static bool InParty(Actor actor) => (GetStatus(actor) & 16) > 0;
+        private static bool InParty(GameObject actor) => (GetStatus(actor) & 16) > 0;
 
-        private static bool InAlliance(Actor actor) => (GetStatus(actor) & 32) > 0;
+        private static bool InAlliance(GameObject actor) => (GetStatus(actor) & 32) > 0;
 
         private bool CanPlaySound() {
             if (!this.Plugin.Config.PlaySoundOnTarget) {
@@ -179,12 +141,12 @@ namespace PeepingTom {
                 return false;
             }
 
-            if (this.Watch == null) {
-                this.Watch = new Stopwatch();
+            if (this.SoundWatch == null) {
+                this.SoundWatch = new Stopwatch();
                 return true;
             }
 
-            var secs = this.Watch.Elapsed.TotalSeconds;
+            var secs = this.SoundWatch.Elapsed.TotalSeconds;
             return secs >= this.Plugin.Config.SoundCooldown;
         }
 
@@ -228,28 +190,10 @@ namespace PeepingTom {
         }
 
         private void SendError(string message) {
-            var payloads = new Payload[] {
-                new TextPayload($"[{this.Plugin.Name}] {message}"),
-            };
-            this.Plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
-                MessageBytes = new SeString(payloads).Encode(),
+            this.Plugin.ChatGui.PrintChat(new XivChatEntry {
+                Message = $"[{this.Plugin.Name}] {message}",
                 Type = XivChatType.ErrorMessage,
             });
-        }
-
-        public void Dispose() {
-            this._currentMutex.Dispose();
-            this._previousMutex.Dispose();
-        }
-    }
-
-    internal class TargetThreadData {
-        public PlayerCharacter LocalPlayer { get; }
-        public Actor[] Actors { get; }
-
-        public TargetThreadData(DalamudPluginInterface pi) {
-            this.LocalPlayer = pi.ClientState.LocalPlayer;
-            this.Actors = pi.ClientState.Actors.ToArray();
         }
     }
 }
