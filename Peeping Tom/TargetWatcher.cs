@@ -10,6 +10,7 @@ using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text;
+using Dalamud.Logging;
 using PeepingTom.Ipc;
 using PeepingTom.Resources;
 
@@ -64,11 +65,19 @@ namespace PeepingTom {
             var newCurrent = this.GetTargeting(this.Plugin.ObjectTable, player);
 
             foreach (var newTargeter in newCurrent.Where(t => this.Current.All(c => c.ObjectId != t.ObjectId))) {
-                this.Plugin.IpcManager.SendNewTargeter(newTargeter);
+                try {
+                    this.Plugin.IpcManager.SendNewTargeter(newTargeter);
+                } catch (Exception ex) {
+                    PluginLog.LogError(ex, "Failed to send IPC message");
+                }
             }
 
             foreach (var stopped in this.Current.Where(t => newCurrent.All(c => c.ObjectId != t.ObjectId))) {
-                this.Plugin.IpcManager.SendStoppedTargeting(stopped);
+                try {
+                    this.Plugin.IpcManager.SendStoppedTargeting(stopped);
+                } catch (Exception ex) {
+                    PluginLog.LogError(ex, "Failed to send IPC message");
+                }
             }
 
             this.Current = newCurrent;

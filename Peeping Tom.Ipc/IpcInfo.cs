@@ -1,4 +1,5 @@
 ﻿using Dalamud.Plugin;
+using Dalamud.Plugin.Ipc;
 using PeepingTom.Ipc.From;
 using PeepingTom.Ipc.To;
 
