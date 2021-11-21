@@ -188,11 +188,15 @@ namespace PeepingTom {
                     using var output = new WaveOutEvent {
                         DeviceNumber = soundDevice,
                     };
-                    output.Init(channel);
-                    output.Play();
+                    try {
+                        output.Init(channel);
+                        output.Play();
 
-                    while (output.PlaybackState == PlaybackState.Playing) {
-                        Thread.Sleep(500);
+                        while (output.PlaybackState == PlaybackState.Playing) {
+                            Thread.Sleep(500);
+                        }
+                    } catch (Exception ex) {
+                        PluginLog.LogError(ex, "Exception playing sound");
                     }
                 }
             }).Start();
