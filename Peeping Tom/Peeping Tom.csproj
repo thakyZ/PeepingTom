@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net5-windows</TargetFramework>
         <RootNamespace>PeepingTom</RootNamespace>
-        <Version>1.7.6</Version>
+        <Version>1.7.7</Version>
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
         <AssemblyName>PeepingTom</AssemblyName>
