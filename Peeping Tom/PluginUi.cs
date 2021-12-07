@@ -370,41 +370,6 @@ namespace PeepingTom {
                     ImGui.EndTabItem();
                 }
 
-                #if DEBUG
-                if (ImGui.BeginTabItem("Debug")) {
-                    if (ImGui.Button("Log targeting you")) {
-                        var player = this.Plugin.Interface.ClientState.LocalPlayer;
-                        if (player != null) {
-                            // loop over all players looking at the current player
-                            var actors = this.Plugin.Interface.ClientState.Actors
-                                .Where(actor => actor.TargetActorID == player.ActorId && actor is PlayerCharacter)
-                                .Cast<PlayerCharacter>();
-                            foreach (var actor in actors) {
-                                var payload = new PlayerPayload(this.Plugin.Interface.Data, actor.Name.TextValue, actor.HomeWorld.Id);
-                                Payload[] payloads = {payload};
-                                this.Plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
-                                    Message = new SeString(payloads),
-                                });
-                            }
-                        }
-                    }
-
-                    if (ImGui.Button("Log your target")) {
-                        var target = this.GetCurrentTarget();
-
-                        if (target != null) {
-                            var payload = new PlayerPayload(this.Plugin.Interface.Data, target.Name.TextValue, target.HomeWorld.Id);
-                            Payload[] payloads = {payload};
-                            this.Plugin.Interface.Framework.Gui.Chat.PrintChat(new XivChatEntry {
-                                Message = new SeString(payloads),
-                            });
-                        }
-                    }
-
-                    ImGui.EndTabItem();
-                }
-                #endif
-
                 ImGui.EndTabBar();
             }
 
