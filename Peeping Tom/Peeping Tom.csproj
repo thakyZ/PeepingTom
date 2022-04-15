@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net5-windows</TargetFramework>
         <RootNamespace>PeepingTom</RootNamespace>
-        <Version>1.7.8</Version>
+        <Version>1.7.9</Version>
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
         <AssemblyName>PeepingTom</AssemblyName>
@@ -41,11 +41,11 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="DalamudPackager" Version="2.1.5"/>
+        <PackageReference Include="DalamudPackager" Version="2.1.6"/>
         <PackageReference Include="Fody" Version="6.6.0" PrivateAssets="all"/>
         <PackageReference Include="NAudio" Version="2.0.1"/>
         <PackageReference Include="Resourcer.Fody" Version="1.8.0" PrivateAssets="all"/>
-        <PackageReference Include="XivCommon" Version="4.0.0-alpha.1"/>
+        <PackageReference Include="XivCommon" Version="5.0.1-alpha.1"/>
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Peeping Tom.Ipc\Peeping Tom.Ipc.csproj"/>
