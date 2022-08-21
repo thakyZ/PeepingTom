@@ -37,7 +37,9 @@ namespace PeepingTom {
         public bool PlaySoundOnTarget { get; set; }
         public string? SoundPath { get; set; }
         public float SoundVolume { get; set; } = 1f;
+        [Obsolete("use new", true)]
         public int SoundDevice { get; set; } = -1;
+        public Guid SoundDeviceNew { get; set; } = Guid.Empty;
         public float SoundCooldown { get; set; } = 10f;
         public bool PlaySoundWhenClosed { get; set; }
 

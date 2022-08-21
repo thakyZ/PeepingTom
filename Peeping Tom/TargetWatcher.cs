@@ -160,9 +160,9 @@ namespace PeepingTom {
         }
 
         private void PlaySound() {
-            var soundDevice = this.Plugin.Config.SoundDevice;
-            if (soundDevice < -1 || soundDevice > WaveOut.DeviceCount) {
-                soundDevice = -1;
+            var soundDevice = DirectSoundOut.Devices.FirstOrDefault(d => d.Guid == this.Plugin.Config.SoundDeviceNew);
+            if (soundDevice == null) {
+                return;
             }
 
             new Thread(() => {
@@ -171,7 +171,7 @@ namespace PeepingTom {
                     if (this.Plugin.Config.SoundPath == null) {
                         reader = new WaveFileReader(Resource.AsStream("Resources/target.wav"));
                     } else {
-                        reader = new AudioFileReader(this.Plugin.Config.SoundPath);
+                        reader = new MediaFoundationReader(this.Plugin.Config.SoundPath);
                     }
                 } catch (Exception e) {
                     var error = string.Format(Language.SoundChatError, e.Message);
@@ -185,9 +185,8 @@ namespace PeepingTom {
                 };
 
                 using (reader) {
-                    using var output = new WaveOutEvent {
-                        DeviceNumber = soundDevice,
-                    };
+                    using var output = new DirectSoundOut(soundDevice.Guid);
+
                     try {
                         output.Init(channel);
                         output.Play();

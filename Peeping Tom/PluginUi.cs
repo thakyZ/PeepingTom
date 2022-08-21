@@ -241,32 +241,18 @@ namespace PeepingTom {
                         this.Plugin.Config.Save();
                     }
 
-                    var soundDevice = this.Plugin.Config.SoundDevice;
-                    string name;
-                    if (soundDevice == -1) {
-                        name = Language.SettingsSoundDefaultDevice;
-                    } else if (soundDevice > -1 && soundDevice < WaveOut.DeviceCount) {
-                        var caps = WaveOut.GetCapabilities(soundDevice);
-                        name = caps.ProductName;
-                    } else {
-                        name = Language.SettingsSoundInvalidDevice;
-                    }
+                    var devices = DirectSoundOut.Devices.ToList();
+                    var soundDevice = devices.FirstOrDefault(d => d.Guid == this.Plugin.Config.SoundDeviceNew);
+                    var name = soundDevice != null ? soundDevice.Description : Language.SettingsSoundInvalidDevice;
 
                     if (ImGui.BeginCombo($"{Language.SettingsSoundOutputDevice}###sound-output-device-combo", name)) {
-                        if (ImGui.Selectable(Language.SettingsSoundDefaultDevice)) {
-                            this.Plugin.Config.SoundDevice = -1;
-                            this.Plugin.Config.Save();
-                        }
-
-                        ImGui.Separator();
-
-                        for (var deviceNum = 0; deviceNum < WaveOut.DeviceCount; deviceNum++) {
-                            var caps = WaveOut.GetCapabilities(deviceNum);
-                            if (!ImGui.Selectable(caps.ProductName)) {
+                        for (var deviceNum = 0; deviceNum < devices.Count; deviceNum++) {
+                            var info = devices[deviceNum];
+                            if (!ImGui.Selectable($"{info.Description}##{deviceNum}")) {
                                 continue;
                             }
 
-                            this.Plugin.Config.SoundDevice = deviceNum;
+                            this.Plugin.Config.SoundDeviceNew = info.Guid;
                             this.Plugin.Config.Save();
                         }
 
@@ -493,7 +479,8 @@ namespace PeepingTom {
                 var time = DateTime.UtcNow - targeter.When >= TimeSpan.FromDays(1)
                     ? targeter.When.ToLocalTime().ToString("dd/MM")
                     : targeter.When.ToLocalTime().ToString("t");
-                ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize(time).X);
+                var windowWidth = ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
+                ImGui.SameLine(windowWidth - ImGui.CalcTextSize(time).X);
 
                 if (flags.HasFlag(ImGuiSelectableFlags.Disabled)) {
                     ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int) ImGuiCol.TextDisabled]);
