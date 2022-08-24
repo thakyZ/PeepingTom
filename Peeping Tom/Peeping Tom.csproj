@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net6-windows</TargetFramework>
         <RootNamespace>PeepingTom</RootNamespace>
-        <Version>1.7.10</Version>
+        <Version>1.7.11</Version>
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
         <AssemblyName>PeepingTom</AssemblyName>
@@ -51,7 +51,7 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="DalamudPackager" Version="2.1.7"/>
+        <PackageReference Include="DalamudPackager" Version="2.1.8"/>
         <PackageReference Include="Fody" Version="6.6.3" PrivateAssets="all"/>
         <PackageReference Include="NAudio.Core" Version="2.1.0"/>
         <PackageReference Include="NAudio.Wasapi" Version="2.1.0"/>
