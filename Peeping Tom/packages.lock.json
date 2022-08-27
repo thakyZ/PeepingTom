@@ -41,9 +41,9 @@
       },
       "XivCommon": {
         "type": "Direct",
-        "requested": "[6.0.1, )",
-        "resolved": "6.0.1",
-        "contentHash": "X58/iHscbwzF9JziooBKYE4S0XDYuGYI7Eg5Er1LhdQSjGwMLes0whRdKtH591wIhefFiS5G14W6EEL3Qt76wg=="
+        "requested": "[6.0.2, )",
+        "resolved": "6.0.2",
+        "contentHash": "C/GnQ61iO0yEpf8LPixU3tCThar1MWUiBkO8gdZHNtVskg8AvFeuIxk7Zmkf2yeAJ0drR/KOTdSS7GpbsgmoaQ=="
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
