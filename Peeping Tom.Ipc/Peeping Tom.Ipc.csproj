@@ -8,6 +8,16 @@
     </PropertyGroup>
 
     <PropertyGroup>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <Title>PeepingTom.Ipc</Title>
+        <Authors>ascclemens</Authors>
+        <RepositoryUrl>https://git.anna.lgbt/ascclemens/PeepingTom</RepositoryUrl>
+        <Description>Types for IPC with the Dalamud plugin Peeping Tom.</Description>
+        <PackageLicenseExpression>EUPL-1.2</PackageLicenseExpression>
+    </PropertyGroup>
+
+    <PropertyGroup>
         <DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev</DalamudLibPath>
     </PropertyGroup>
 
