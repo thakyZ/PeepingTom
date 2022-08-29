@@ -10,6 +10,7 @@
     <PropertyGroup>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <PackageId>PeepingTom.Ipc</PackageId>
         <Title>PeepingTom.Ipc</Title>
         <Authors>ascclemens</Authors>
         <RepositoryUrl>https://git.anna.lgbt/ascclemens/PeepingTom</RepositoryUrl>

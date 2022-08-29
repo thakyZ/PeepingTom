@@ -943,7 +943,7 @@
           "System.Xml.ReaderWriter": "4.3.0"
         }
       },
-      "peeping tom.ipc": {
+      "PeepingTom.Ipc": {
         "type": "Project"
       }
     }
